@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบสั่งอาหารอัจฉริยะ</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <style>
+        :root { --primary: #2ecc71; --secondary: #e67e22; --danger: #e74c3c; }
+        body { font-family: 'Kanit', sans-serif; background:#f4f7f6; margin:0; color: #333; }
+        .container { display:flex; flex-wrap:wrap; max-width: 1200px; margin: auto; }
+        .box { flex:1; min-width:350px; padding:20px; box-sizing: border-box; }
+        .card-ui { background:white; padding:20px; border-radius:15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        
+        /* Menu Grid */
+        .menu-item { display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #eee; padding: 10px 0; }
+        .menu-img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; }
+        
+        input, select, textarea { width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:8px; box-sizing: border-box; }
+        button { width:100%; padding:12px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; transition: 0.3s; margin-top: 5px; }
+        .btn-order { background: var(--primary); color:white; font-size: 1.1em; }
+        .btn-gps { background: #3498db; color:white; }
+        
+        /* Order Cards */
+        .order-card { background:white; padding:15px; margin:10px 0; border-radius:10px; border-left:8px solid var(--secondary); position: relative; }
+        .status-badge { display:inline-block; padding:3px 8px; border-radius:5px; font-size:0.8em; background:#eee; }
+        .qr-area { text-align: center; margin-top: 10px; }
+        .qr-area img { width: 150px; border: 1px solid #eee; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- ฝั่งลูกค้า: สั่งอาหาร -->
+    <div class="box">
+        <div class="card-ui">
+            <h2>🍛 สั่งอาหาร/จองล่วงหน้า</h2>
+            <div id="menu-list">
+                <!-- เมนูจะโหลดจาก JavaScript -->
+            </div>
+            
+            <hr>
+            <input id="name" placeholder="ชื่อผู้สั่ง">
+            <input id="phone" placeholder="เบอร์โทรศัพท์" type="tel">
+            
+            <select id="order_type">
+                <option value="pickup">📍 มารับเองที่ร้าน (จอง)</option>
+                <option value="delivery">🚚 ให้ไปส่ง (ใส่ที่อยู่/GPS)</option>
+            </select>
+            
+            <div id="address_section" style="display:none;">
+                <textarea id="address" placeholder="ที่อยู่โดยละเอียด"></textarea>
+                <button class="btn-gps" onclick="getLocation()">📌 แชร์ตำแหน่ง GPS ปัจจุบัน</button>
+                <p id="gps_status" style="font-size:0.8em; color:gray;"></p>
+            </div>
+
+            <button class="btn-order" onclick="placeOrder()">ยืนยันการสั่งซื้อ</button>
+        </div>
+        
+        <div class="card-ui">
+            <h4>💬 ความคิดเห็นลูกค้า</h4>
+            <input id="comment_name" placeholder="ชื่อ">
+            <input id="comment_text" placeholder="รสชาติเป็นอย่างไรบ้าง?">
+            <button onclick="sendComment()">ส่งความเห็น</button>
+        </div>
+    </div>
+
+    <!-- ฝั่งร้านค้า: จัดการออเดอร์ -->
+    <div class="box">
+        <div class="card-ui" style="background: #2c3e50; color: white;">
+            <h3>📦 จัดการออเดอร์ (<span id="count">0</span>)</h3>
+            <p>ยอดรวมวันนี้: <span id="daily_total">0</span> บาท</p>
+        </div>
+        <div id="order_list"></div>
+    </div>
+
+</div>
+
+<!-- Audio Elements (ใส่ไฟล์เสียงที่คุณต้องการ) -->
+<audio id="sound_new" src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3"></audio>
+<audio id="sound_cancel" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3"></audio>
+
+<script>
+// 1. CONFIG: ใส่ข้อมูล Firebase ของคุณที่นี่
+const firebaseConfig = {
+    apiKey: "AIzaSyARQ9iDSAP-HSnZlHH854p1qnUPCmjtyvo",
+    authDomain: "project-8472595372192265726.firebaseapp.com",
+    databaseURL: https://project-8472595372192265726-default-rtdb.asia-southeast1.firebasedatabase.app/
+:
+null
+    projectId:  "project-8472595372192265726"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// 2. DATA: ข้อมูลเมนูอาหารและสต็อก (สามารถย้ายไปเก็บใน Firebase ได้)
+let foodMenu = [
+    { id: 1, name: "กะเพราไก่ไข่ดาว", price: 60, stock: 10, img: "https://cdn-icons-png.flaticon.com/512/135/135161.png" },
+    { id: 2, name: "ข้าวผัดหมู", price: 50, stock: 5, img: "https://cdn-icons-png.flaticon.com/512/3082/3082031.png" },
+    { id: 3, name: "ผัดซีอิ๊ว", price: 55, stock: 2, img: "https://cdn-icons-png.flaticon.com/512/2276/2276931.png" }
+];
+
+let userCoords = null;
+
+// แสดงเมนู
+function renderMenu() {
+    const container = document.getElementById("menu-list");
+    container.innerHTML = foodMenu.map(item => `
+        <div class="menu-item">
+            <img src="${item.img}" class="menu-img">
+            <div style="flex:1">
+                <strong>${item.name}</strong><br>
+                <small>เหลือ: ${item.stock} จาน</small>
+            </div>
+            <div style="text-align:right">
+                <span style="color:green">${item.price}฿</span><br>
+                <input type="number" id="qty_${item.id}" value="0" min="0" max="${item.stock}" style="width:50px">
+            </div>
+        </div>
+    `).join('');
+}
+renderMenu();
+
+// ระบบ GPS
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+            userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            document.getElementById("gps_status").innerText = "✅ บันทึกพิกัดสำเร็จ!";
+        });
+    }
+}
+
+document.getElementById("order_type").onchange = function() {
+    document.getElementById("address_section").style.display = this.value === 'delivery' ? 'block' : 'none';
+};
+
+// 3. สั่งอาหาร
+function placeOrder() {
+    let name = document.getElementById("name").value;
+    let phone = document.getElementById("phone").value;
+    let type = document.getElementById("order_type").value;
+    
+    let items = [];
+    let grandTotal = 0;
+
+    foodMenu.forEach(m => {
+        let q = parseInt(document.getElementById("qty_"+m.id).value);
+        if(q > 0) {
+            items.push({ name: m.name, qty: q, price: m.price });
+            grandTotal += (m.price * q);
+            m.stock -= q; // ลดสต็อกจำลอง (ในระบบจริงควรลดใน DB Transaction)
+        }
+    });
+
+    if(items.length === 0 || name === "" || phone === "") {
+        alert("กรุณาเลือกอาหารและกรอกข้อมูลให้ครบ");
+        return;
+    }
+
+    db.ref("orders").push({
+        name, phone, items, grandTotal, type,
+        address: document.getElementById("address").value,
+        coords: userCoords,
+        status: "ออเดอร์ใหม่",
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    }).then(() => {
+        alert("สั่งอาหารสำเร็จ! กรุณารอรับอาหาร");
+        renderMenu(); // Update stock UI
+    });
+}
+
+// 4. ฝั่งร้านค้า: ดึงข้อมูลและแจ้งเตือนเสียง
+let lastOrderCount = -1;
+db.ref("orders").on("value", snapshot => {
+    const list = document.getElementById("order_list");
+    list.innerHTML = "";
+    let count = 0;
+    let dailyTotal = 0;
+
+    snapshot.forEach(child => {
+        let data = child.val();
+        let key = child.key;
+        count++;
+        dailyTotal += data.grandTotal;
+
+        // ระบบเสียง (ถ้าจำนวนออเดอร์เพิ่มขึ้น)
+        if (lastOrderCount !== -1 && count > lastOrderCount) {
+            document.getElementById("sound_new").play();
+        }
+
+        let itemsHtml = data.items.map(i => `${i.name} x${i.qty}`).join(', ');
+        
+        // สร้าง PromptPay QR (08x-xxx-xxxx แทนที่ด้วยเบอร์ร้าน)
+        let qrUrl = `https://promptpay.io/0812345678/${data.grandTotal}.png`;
+
+        list.innerHTML += `
+            <div class="order-card" style="${data.status === 'ยกเลิก' ? 'opacity:0.6; border-left-color:red;' : ''}">
+                <strong>👤 ${data.name}</strong> (${data.phone}) 
+                <span class="status-badge">${data.status}</span><br>
+                🍽 ${itemsHtml}<br>
+                💰 <strong>ยอดรวม: ${data.grandTotal} บาท</strong><br>
+                🚚 ${data.type === 'delivery' ? `ที่อยู่: ${data.address}` : 'จอง/มารับเอง'}
+                ${data.coords ? `<br>📍 <a href="https://www.google.com/maps?q=${data.coords.lat},${data.coords.lng}" target="_blank">ดูแผนที่ลูกค้า</a>` : ''}
+                
+                <div class="qr-area">
+                    <img src="${qrUrl}" alt="QR Payment"><br><small>แสกนจ่ายเงิน</small>
+                </div>
+
+                <div style="display:flex; gap:5px; margin-top:10px;">
+                    <button style="background:#f1c40f" onclick="updateStatus('${key}','กำลังทำ')">👩‍🍳 ทำอาหาร</button>
+                    <button style="background:#2ecc71; color:white" onclick="updateStatus('${key}','เสร็จแล้ว')">✅ เสร็จ</button>
+                    <button style="background:#e74c3c; color:white" onclick="cancelOrder('${key}')">❌ ยกเลิก</button>
+                </div>
+            </div>
+        `;
+    });
+
+    lastOrderCount = count;
+    document.getElementById("count").innerText = count;
+    document.getElementById("daily_total").innerText = dailyTotal;
+});
+
+function updateStatus(key, status) {
+    db.ref("orders/" + key).update({ status });
+}
+
+function cancelOrder(key) {
+    if(confirm("ยืนยันการยกเลิก?")) {
+        document.getElementById("sound_cancel").play();
+        db.ref("orders/" + key).update({ status: "ยกเลิก" });
+    }
+}
+
+// ระบบความคิดเห็น
+function sendComment() {
+    let name = document.getElementById("comment_name").value;
+    let text = document.getElementById("comment_text").value;
+    if(name && text) {
+        db.ref("comments").push({ name, text, time: new Date().toLocaleString() });
+        alert("ขอบคุณสำหรับคำแนะนำครับ!");
+    }
+}
+</script>
+
+</body>
+</html>
