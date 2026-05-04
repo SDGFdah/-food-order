@@ -3,129 +3,358 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบสั่งอาหารอัจฉริยะ</title>
-
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
+    <title>Nature Gourmet - Experience the Taste</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;400;600&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
     <style>
-        :root { --primary: #2ecc71; --secondary: #e67e22; --danger: #e74c3c; }
-        body { font-family: 'Kanit', sans-serif; background:#f4f7f6; margin:0; color: #333; }
-        .container { display:flex; flex-wrap:wrap; max-width: 1200px; margin: auto; }
-        .box { flex:1; min-width:350px; padding:20px; box-sizing: border-box; }
-        .card-ui { background:white; padding:20px; border-radius:15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        
-        /* Menu Grid */
-        .menu-item { display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #eee; padding: 10px 0; }
-        .menu-img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; }
-        
-        input, select, textarea { width:100%; padding:12px; margin:8px 0; border:1px solid #ddd; border-radius:8px; box-sizing: border-box; }
-        button { width:100%; padding:12px; border:none; border-radius:8px; cursor:pointer; font-weight:bold; transition: 0.3s; margin-top: 5px; }
-        .btn-order { background: var(--primary); color:white; font-size: 1.1em; }
-        .btn-gps { background: #3498db; color:white; }
-        
-        /* Order Cards */
-        .order-card { background:white; padding:15px; margin:10px 0; border-radius:10px; border-left:8px solid var(--secondary); position: relative; }
-        .status-badge { display:inline-block; padding:3px 8px; border-radius:5px; font-size:0.8em; background:#eee; }
-        .qr-area { text-align: center; margin-top: 10px; }
-        .qr-area img { width: 150px; border: 1px solid #eee; }
+        :root {
+            --nature-green: #4b6043;
+            --soft-cream: #f9f7f2;
+            --accent-gold: #c5a059;
+            --glass-white: rgba(255, 255, 255, 0.85);
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: var(--soft-cream);
+            background-image: url('https://www.transparenttextures.com/patterns/papyros.png');
+            margin: 0;
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        /* Container & Glassmorphism */
+        .secure-wrapper {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .page {
+            display: none;
+            padding: 25px;
+            animation: fadeInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* [1] & [2] Promo Pages */
+        .hero-card {
+            height: 85vh;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+
+        .hero-content {
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            padding: 40px 25px;
+            width: 100%;
+            color: white;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 3rem;
+            margin: 0;
+            line-height: 1;
+        }
+
+        /* Input Styles */
+        .custom-input {
+            width: 100%;
+            padding: 18px;
+            border: 2px solid #eee;
+            border-radius: 20px;
+            background: var(--glass-white);
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        .custom-input:focus {
+            border-color: var(--nature-green);
+            outline: none;
+            box-shadow: 0 0 15px rgba(75,96,67,0.1);
+        }
+
+        /* Menu Card Styles */
+        .food-card {
+            background: white;
+            border-radius: 30px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+
+        .food-card:active { transform: scale(0.98); }
+
+        .food-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+
+        .food-info { padding: 20px; display: flex; justify-content: space-between; align-items: center; }
+
+        .price-big {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--nature-green);
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            background: #f0f0f0;
+            border-radius: 15px;
+            padding: 5px 15px;
+        }
+
+        .qty-num {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 15px;
+            color: var(--nature-green);
+        }
+
+        /* Buttons */
+        .btn-premium {
+            background: var(--nature-green);
+            color: white;
+            border: none;
+            padding: 20px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(75,96,67,0.3);
+            transition: 0.3s;
+        }
+
+        .btn-premium:hover { filter: brightness(1.2); }
+
+        .total-floating {
+            background: var(--nature-green);
+            color: white;
+            padding: 25px;
+            border-radius: 30px 30px 0 0;
+            margin-top: auto;
+            text-align: center;
+        }
+
+        /* Animations */
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .thank-you-circle {
+            width: 150px;
+            height: 150px;
+            background: #e8f0e5;
+            border-radius: 50%;
+            margin: 40px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    
-    <!-- ฝั่งลูกค้า: สั่งอาหาร -->
-    <div class="box">
-        <div class="card-ui">
-            <h2>🍛 สั่งอาหาร/จองล่วงหน้า</h2>
-            <div id="menu-list">
-                <!-- เมนูจะโหลดจาก JavaScript -->
-            </div>
-            
-            <hr>
-            <input id="name" placeholder="ชื่อผู้สั่ง">
-            <input id="phone" placeholder="เบอร์โทรศัพท์" type="tel">
-            
-            <select id="order_type">
-                <option value="pickup">📍 มารับเองที่ร้าน (จอง)</option>
-                <option value="delivery">🚚 ให้ไปส่ง (ใส่ที่อยู่/GPS)</option>
-            </select>
-            
-            <div id="address_section" style="display:none;">
-                <textarea id="address" placeholder="ที่อยู่โดยละเอียด"></textarea>
-                <button class="btn-gps" onclick="getLocation()">📌 แชร์ตำแหน่ง GPS ปัจจุบัน</button>
-                <p id="gps_status" style="font-size:0.8em; color:gray;"></p>
-            </div>
+<div class="secure-wrapper">
 
-            <button class="btn-order" onclick="placeOrder()">ยืนยันการสั่งซื้อ</button>
+    <!-- หน้าที่ 1: ปกแรก (Welcome) -->
+    <div id="p1" class="page active">
+        <!-- [ใส่รูปบรรยากาศร้านตรงนี้] -->
+        <div class="hero-card" style="background-image: url('https://images.unsplash.com/photo-1550966842-2849a221082b?q=80&w=1000');">
+            <div class="hero-content">
+                <h1 class="hero-title">Welcome</h1>
+                <p style="font-weight: 200; font-size: 1.2rem;">สัมผัสรสชาติแห่งธรรมชาติที่เราตั้งใจ</p>
+            </div>
         </div>
+        <input type="text" id="custName" class="custom-input" placeholder="ขอทราบชื่อคุณลูกค้าครับ/ค่ะ">
+        <input type="tel" id="custTel" class="custom-input" placeholder="เบอร์โทรศัพท์ติดต่อ">
+        <button class="btn-premium" onclick="go(2)">เริ่มต้นประสบการณ์ ➔</button>
+    </div>
+
+    <!-- หน้าที่ 2: รีวิวบรรยากาศ (Promo 2) -->
+    <div id="p2" class="page">
+        <!-- [ใส่รูปรีวิวอาหารสวยๆ ตรงนี้] -->
+        <div class="hero-card" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?q=80&w=1000');">
+            <div class="hero-content">
+                <h1 class="hero-title">The Review</h1>
+                <p style="font-weight: 200;">"รสชาติที่ลูกค้ากว่า 1,000 คนไว้วางใจ"</p>
+            </div>
+        </div>
+        <p style="text-align: center; color: #666; font-style: italic;">"วัตถุดิบสดใหม่ ส่งตรงจากฟาร์มทุกวัน"</p>
+        <button class="btn-premium" onclick="go(3)">ดูเมนูอาหารวันนี้ 🍽️</button>
+        <p onclick="go(1)" style="text-align:center; color: #999; margin-top:15px; cursor:pointer;">⬅ ย้อนกลับ</p>
+    </div>
+
+    <!-- หน้าที่ 3: เลือกเมนู (Premium Menu) -->
+    <div id="p3" class="page">
+        <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem;">Our Menu</h2>
         
-        <div class="card-ui">
-            <h4>💬 ความคิดเห็นลูกค้า</h4>
-            <input id="comment_name" placeholder="ชื่อ">
-            <input id="comment_text" placeholder="รสชาติเป็นอย่างไรบ้าง?">
-            <button onclick="sendComment()">ส่งความเห็น</button>
+        <!-- เมนู 1 -->
+        <div class="food-card">
+            <!-- [ใส่รูปอาหารจริงตรงนี้] -->
+            <img src="https://images.unsplash.com/photo-1559844641-33758223b20e?q=80&w=500" class="food-img">
+            <div class="food-info">
+                <div>
+                    <h3 style="margin:0">พะแนงหมูสูตรเข้มข้น</h3>
+                    <span id="stock-panang" style="color: #999; font-size: 0.8rem;">ของเหลือ 0</span>
+                </div>
+                <div class="price-big">60.-</div>
+            </div>
+            <div style="padding: 0 20px 20px;">
+                <div class="qty-control">
+                    <button onclick="changeQty('panang', -1)" style="border:none; font-size:1.5rem;">-</button>
+                    <span id="qty-panang" class="qty-num">0</span>
+                    <button onclick="changeQty('panang', 1)" style="border:none; font-size:1.5rem;">+</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- เมนู 2 -->
+        <div class="food-card">
+            <!-- [ใส่รูปอาหารจริงตรงนี้] -->
+            <img src="https://images.unsplash.com/photo-1512058560550-42749359a60b?q=80&w=500" class="food-img">
+            <div class="food-info">
+                <div>
+                    <h3 style="margin:0">กะเพราหมูกรอบในตำนาน</h3>
+                    <span id="stock-krapao" style="color: #999; font-size: 0.8rem;">ของเหลือ 0</span>
+                </div>
+                <div class="price-big">70.-</div>
+            </div>
+            <div style="padding: 0 20px 20px;">
+                <div class="qty-control">
+                    <button onclick="changeQty('krapao', -1)" style="border:none; font-size:1.5rem;">-</button>
+                    <span id="qty-krapao" class="qty-num">0</span>
+                    <button onclick="changeQty('krapao', 1)" style="border:none; font-size:1.5rem;">+</button>
+                </div>
+            </div>
+        </div>
+
+        <textarea id="note" class="custom-input" placeholder="คำขอพิเศษ: เช่น ไม่ใส่พริก, ไม่ใส่ผัก, หรือสั่งล่วงหน้าเวลา..."></textarea>
+        
+        <div class="total-floating">
+            <span style="font-size: 1rem; opacity: 0.8;">ยอดรวมทั้งหมด</span>
+            <div style="font-size: 2.5rem; font-weight: 600;"><span id="totalPrice">0</span> ฿</div>
+            <button class="btn-premium" style="background: white; color: var(--nature-green); margin-top:15px;" onclick="go(4)">ชำระเงิน ➔</button>
         </div>
     </div>
 
-    <!-- ฝั่งร้านค้า: จัดการออเดอร์ -->
-    <div class="box">
-        <div class="card-ui" style="background: #2c3e50; color: white;">
-            <h3>📦 จัดการออเดอร์ (<span id="count">0</span>)</h3>
-            <p>ยอดรวมวันนี้: <span id="daily_total">0</span> บาท</p>
+    <!-- หน้าที่ 4: ชำระเงิน -->
+    <div id="p4" class="page">
+        <h2 style="text-align:center">Checkout</h2>
+        <div class="food-card" style="padding: 25px; text-align: center;">
+            <p>เลือกช่องทางชำระเงิน</p>
+            <select id="payMethod" class="custom-input">
+                <option value="เงินสด">เงินสด (Cash)</option>
+                <option value="สแกนจ่าย">สแกนจ่าย (QR PromptPay)</option>
+            </select>
+            <div id="qrArea" style="margin: 20px 0;">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PROMPTPAY" style="width:200px; border-radius: 0;">
+                <p style="font-size: 0.8rem; color: #888;">กรุณาแนบหลักฐานการโอน</p>
+                <input type="file" id="slip" class="custom-input" style="font-size: 0.8rem;">
+            </div>
         </div>
-        <div id="order_list"></div>
+        <button class="btn-premium" onclick="confirmOrder()" style="background:#2ed573;">ยืนยันคำสั่งซื้อ ✨</button>
+        <button class="btn-cancel" style="width:100%; margin-top:20px; background:none; border:none; color:#999; cursor:pointer;" onclick="cancelOrder()">ยกเลิกรายการนี้</button>
+    </div>
+
+    <!-- หน้าสุดท้าย: ขอบคุณ -->
+    <div id="p5" class="page" style="text-align: center;">
+        <div class="thank-you-circle">🥗</div>
+        <h1 style="font-family: 'Playfair Display', serif; font-size: 3rem; color: var(--nature-green);">Thank You</h1>
+        <p style="font-size: 1.2rem; line-height: 1.6;">ขอบคุณคุณลูกค้าที่ไว้วางใจให้เราดูแลมื้ออาหารในวันนี้ครับ/ค่ะ</p>
+        <div style="margin: 40px 0; padding: 20px; border: 1px dashed var(--accent-gold); border-radius: 20px;">
+            <p style="color: var(--accent-gold); font-weight: 600;">ยินดีต้อนรับสำหรับครั้งต่อไปนะครับ/ค่ะ</p>
+        </div>
+        <button class="btn-premium" onclick="location.reload()" style="background: var(--soft-cream); color: var(--nature-green); border: 1px solid var(--nature-green); box-shadow:none;">กลับไปหน้าหลัก</button>
     </div>
 
 </div>
 
-<!-- Audio Elements (ใส่ไฟล์เสียงที่คุณต้องการ) -->
-<audio id="sound_new" src="https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3"></audio>
-<audio id="sound_cancel" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3"></audio>
-
 <script>
-<!-- 1. เรียกใช้ Library ของ Firebase (ต้องมี 2 อันนี้) -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    // --- FIREBASE CONFIG (คุณต้องเอามาใส่เองนะ) ---
+    const firebaseConfig = { apiKey: "...", databaseURL: "...", projectId: "..." };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-<script>
-  // 2. ตั้งค่าการเชื่อมต่อ (เอาตัวเลขและลิงก์ของคุณมาใส่)
-  const firebaseConfig = {
-    apiKey: "AIzaSyARQ9iDSAP-HSnZlHH854p1qnUPCmjtyvo",
-    authDomain: "project-8472595372192265726.firebaseapp.com",
-    databaseURL: https://project-8472595372192265726-default-rtdb.asia-southeast1.firebasedatabase.app/
-    projectId: "project-8472595372192265726",
-    storageBucket: "project-8472595372192265726.appspot.com",
-    messagingSenderId: "847259537219",
-    appId: "เอา App ID ของคุณมาวางตรงนี้"
-  };
+    let quantities = { panang: 0, krapao: 0 };
+    let currentTotal = 0;
 
-  // 3. เริ่มทำงาน
-  if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-  }
-  const db = firebase.database().ref('orders'); // <--- ชื่อหัวข้อที่จะไปแทนที่ null
+    function go(pageNumber) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('p' + pageNumber).classList.add('active');
+        window.scrollTo(0,0);
+    }
 
-  // 4. ฟังก์ชันตอนกดปุ่มสั่งอาหาร
-  function submitOrder() {
-    // สมมติว่ามีช่องกรอกชื่อ ID ว่า "customerName"
-    const name = document.getElementById('customerName').value; 
-    
-    db.push({
-      name: name,
-      time: new Date().toLocaleString(),
-      status: "รอดำเนินการ"
-    })
-    .then(() => {
-      alert("สั่งอาหารสำเร็จ! ข้อมูลไปโผล่ที่ Firebase แล้ว");
-    })
-    .catch((error) => {
-      alert("เกิดข้อผิดพลาด: " + error.message);
+    function changeQty(item, delta) {
+        quantities[item] = Math.max(0, quantities[item] + delta);
+        document.getElementById('qty-' + item).innerText = quantities[item];
+        calcPrice();
+    }
+
+    function calcPrice() {
+        currentTotal = (quantities.panang * 60) + (quantities.krapao * 70);
+        document.getElementById('totalPrice').innerText = currentTotal;
+    }
+
+    function confirmOrder() {
+        const name = document.getElementById('custName').value;
+        const tel = document.getElementById('custTel').value;
+        if(!name || !tel) return alert("กรุณากรอกข้อมูลติดต่อในหน้าแรกให้ครบถ้วน");
+        if(currentTotal === 0) return alert("กรุณาเลือกเมนูอาหารอย่างน้อย 1 รายการ");
+
+        db.ref('orders').push({
+            customer: name,
+            tel: tel,
+            items: quantities,
+            total: currentTotal,
+            note: document.getElementById('note').value,
+            method: document.getElementById('payMethod').value,
+            time: new Date().toLocaleString()
+        }).then(() => {
+            go(5); // ไปหน้าขอบคุณ
+        });
+    }
+
+    function cancelOrder() {
+        if(confirm("ยืนยันการยกเลิกออเดอร์?")) {
+            location.reload();
+        }
+    }
+
+    // Sync Stock
+    db.ref('stock').on('value', snap => {
+        const data = snap.val();
+        if(data) {
+            document.getElementById('stock-panang').innerText = "ของเหลือ " + data.panang;
+            document.getElementById('stock-krapao').innerText = "ของเหลือ " + data.krapao;
+        }
     });
-  }
-</script>
 </script>
 
 </body>
