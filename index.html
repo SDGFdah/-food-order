@@ -86,164 +86,46 @@
 <audio id="sound_cancel" src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3"></audio>
 
 <script>
-// 1. CONFIG: ใส่ข้อมูล Firebase ของคุณที่นี่
-const firebaseConfig = {
-    apiKey: "AIzaSyARQ9iDSAP-HSnZlHH854p1qnUPCmjtyvo",
+<!-- 1. เรียกใช้ Library ของ Firebase (ต้องมี 2 อันนี้) -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+<script>
+  // 2. ตั้งค่าการเชื่อมต่อ (เอาตัวเลขและลิงก์ของคุณมาใส่)
+  const firebaseConfig = {
+    apiKey: "เอา API Key ของคุณมาวางตรงนี้",
     authDomain: "project-8472595372192265726.firebaseapp.com",
-    databaseURL: https://project-8472595372192265726-default-rtdb.asia-southeast1.firebasedatabase.app/:
-    projectId:  "project-8472595372192265726"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+    databaseURL: "https://project-8472595372192265726-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "project-8472595372192265726",
+    storageBucket: "project-8472595372192265726.appspot.com",
+    messagingSenderId: "847259537219",
+    appId: "เอา App ID ของคุณมาวางตรงนี้"
+  };
 
-// 2. DATA: ข้อมูลเมนูอาหารและสต็อก (สามารถย้ายไปเก็บใน Firebase ได้)
-let foodMenu = [
-    { id: 1, name: "กะเพราไก่ไข่ดาว", price: 60, stock: 10, img: "https://cdn-icons-png.flaticon.com/512/135/135161.png" },
-    { id: 2, name: "ข้าวผัดหมู", price: 50, stock: 5, img: "https://cdn-icons-png.flaticon.com/512/3082/3082031.png" },
-    { id: 3, name: "ผัดซีอิ๊ว", price: 55, stock: 2, img: "https://cdn-icons-png.flaticon.com/512/2276/2276931.png" }
-];
+  // 3. เริ่มทำงาน
+  if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+  }
+  const db = firebase.database().ref('orders'); // <--- ชื่อหัวข้อที่จะไปแทนที่ null
 
-let userCoords = null;
-
-// แสดงเมนู
-function renderMenu() {
-    const container = document.getElementById("menu-list");
-    container.innerHTML = foodMenu.map(item => `
-        <div class="menu-item">
-            <img src="${item.img}" class="menu-img">
-            <div style="flex:1">
-                <strong>${item.name}</strong><br>
-                <small>เหลือ: ${item.stock} จาน</small>
-            </div>
-            <div style="text-align:right">
-                <span style="color:green">${item.price}฿</span><br>
-                <input type="number" id="qty_${item.id}" value="0" min="0" max="${item.stock}" style="width:50px">
-            </div>
-        </div>
-    `).join('');
-}
-renderMenu();
-
-// ระบบ GPS
-function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => {
-            userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-            document.getElementById("gps_status").innerText = "✅ บันทึกพิกัดสำเร็จ!";
-        });
-    }
-}
-
-document.getElementById("order_type").onchange = function() {
-    document.getElementById("address_section").style.display = this.value === 'delivery' ? 'block' : 'none';
-};
-
-// 3. สั่งอาหาร
-function placeOrder() {
-    let name = document.getElementById("name").value;
-    let phone = document.getElementById("phone").value;
-    let type = document.getElementById("order_type").value;
+  // 4. ฟังก์ชันตอนกดปุ่มสั่งอาหาร
+  function submitOrder() {
+    // สมมติว่ามีช่องกรอกชื่อ ID ว่า "customerName"
+    const name = document.getElementById('customerName').value; 
     
-    let items = [];
-    let grandTotal = 0;
-
-    foodMenu.forEach(m => {
-        let q = parseInt(document.getElementById("qty_"+m.id).value);
-        if(q > 0) {
-            items.push({ name: m.name, qty: q, price: m.price });
-            grandTotal += (m.price * q);
-            m.stock -= q; // ลดสต็อกจำลอง (ในระบบจริงควรลดใน DB Transaction)
-        }
+    db.push({
+      name: name,
+      time: new Date().toLocaleString(),
+      status: "รอดำเนินการ"
+    })
+    .then(() => {
+      alert("สั่งอาหารสำเร็จ! ข้อมูลไปโผล่ที่ Firebase แล้ว");
+    })
+    .catch((error) => {
+      alert("เกิดข้อผิดพลาด: " + error.message);
     });
-
-    if(items.length === 0 || name === "" || phone === "") {
-        alert("กรุณาเลือกอาหารและกรอกข้อมูลให้ครบ");
-        return;
-    }
-
-    db.ref("orders").push({
-        name, phone, items, grandTotal, type,
-        address: document.getElementById("address").value,
-        coords: userCoords,
-        status: "ออเดอร์ใหม่",
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-    }).then(() => {
-        alert("สั่งอาหารสำเร็จ! กรุณารอรับอาหาร");
-        renderMenu(); // Update stock UI
-    });
-}
-
-// 4. ฝั่งร้านค้า: ดึงข้อมูลและแจ้งเตือนเสียง
-let lastOrderCount = -1;
-db.ref("orders").on("value", snapshot => {
-    const list = document.getElementById("order_list");
-    list.innerHTML = "";
-    let count = 0;
-    let dailyTotal = 0;
-
-    snapshot.forEach(child => {
-        let data = child.val();
-        let key = child.key;
-        count++;
-        dailyTotal += data.grandTotal;
-
-        // ระบบเสียง (ถ้าจำนวนออเดอร์เพิ่มขึ้น)
-        if (lastOrderCount !== -1 && count > lastOrderCount) {
-            document.getElementById("sound_new").play();
-        }
-
-        let itemsHtml = data.items.map(i => `${i.name} x${i.qty}`).join(', ');
-        
-        // สร้าง PromptPay QR (08x-xxx-xxxx แทนที่ด้วยเบอร์ร้าน)
-        let qrUrl = `https://promptpay.io/0812345678/${data.grandTotal}.png`;
-
-        list.innerHTML += `
-            <div class="order-card" style="${data.status === 'ยกเลิก' ? 'opacity:0.6; border-left-color:red;' : ''}">
-                <strong>👤 ${data.name}</strong> (${data.phone}) 
-                <span class="status-badge">${data.status}</span><br>
-                🍽 ${itemsHtml}<br>
-                💰 <strong>ยอดรวม: ${data.grandTotal} บาท</strong><br>
-                🚚 ${data.type === 'delivery' ? `ที่อยู่: ${data.address}` : 'จอง/มารับเอง'}
-                ${data.coords ? `<br>📍 <a href="https://www.google.com/maps?q=${data.coords.lat},${data.coords.lng}" target="_blank">ดูแผนที่ลูกค้า</a>` : ''}
-                
-                <div class="qr-area">
-                    <img src="${qrUrl}" alt="QR Payment"><br><small>แสกนจ่ายเงิน</small>
-                </div>
-
-                <div style="display:flex; gap:5px; margin-top:10px;">
-                    <button style="background:#f1c40f" onclick="updateStatus('${key}','กำลังทำ')">👩‍🍳 ทำอาหาร</button>
-                    <button style="background:#2ecc71; color:white" onclick="updateStatus('${key}','เสร็จแล้ว')">✅ เสร็จ</button>
-                    <button style="background:#e74c3c; color:white" onclick="cancelOrder('${key}')">❌ ยกเลิก</button>
-                </div>
-            </div>
-        `;
-    });
-
-    lastOrderCount = count;
-    document.getElementById("count").innerText = count;
-    document.getElementById("daily_total").innerText = dailyTotal;
-});
-
-function updateStatus(key, status) {
-    db.ref("orders/" + key).update({ status });
-}
-
-function cancelOrder(key) {
-    if(confirm("ยืนยันการยกเลิก?")) {
-        document.getElementById("sound_cancel").play();
-        db.ref("orders/" + key).update({ status: "ยกเลิก" });
-    }
-}
-
-// ระบบความคิดเห็น
-function sendComment() {
-    let name = document.getElementById("comment_name").value;
-    let text = document.getElementById("comment_text").value;
-    if(name && text) {
-        db.ref("comments").push({ name, text, time: new Date().toLocaleString() });
-        alert("ขอบคุณสำหรับคำแนะนำครับ!");
-    }
-}
+  }
+</script>
 </script>
 
 </body>
