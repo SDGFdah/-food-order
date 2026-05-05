@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nature Gourmet Premium</title>
+    <title>Nature Gourmet Premium + GPS</title>
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;400;600&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     
     <style>
         :root {
-            --primary: #3d5a44; /* เขียวเข้มธรรมชาติ */
-            --accent: #c5a059;  /* ทองอ่อน */
+            --primary: #3d5a44;
+            --accent: #c5a059;
             --bg: #fdfcf9;
-            --card-white: rgba(255, 255, 255, 0.95);
         }
 
         body {
@@ -22,7 +23,6 @@
             background-color: var(--bg);
             margin: 0;
             color: #2d3436;
-            overflow-x: hidden;
         }
 
         .main-container {
@@ -37,207 +37,195 @@
         .page {
             display: none;
             padding: 20px;
-            animation: slideUp 0.5s ease-out;
+            animation: fadeIn 0.4s ease-out;
         }
 
         .page.active { display: block; }
 
-        /* [1] Hero Section */
         .hero {
-            height: 70vh;
+            height: 50vh;
             margin: -20px -20px 20px -20px;
             background-image: url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=1000');
             background-size: cover;
             background-position: center;
-            border-radius: 0 0 50px 50px;
+            border-radius: 0 0 40px 40px;
             display: flex;
             align-items: flex-end;
             position: relative;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
         }
 
         .hero-overlay {
             background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-            padding: 40px 30px;
+            padding: 30px;
             width: 100%;
-            border-radius: 0 0 50px 50px;
+            border-radius: 0 0 40px 40px;
             color: white;
         }
 
-        /* [2] Input Styles */
-        .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--primary); }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; margin-bottom: 5px; font-weight: 600; color: var(--primary); }
+        
         .modern-input {
             width: 100%;
-            padding: 18px;
+            padding: 15px;
             border: 1.5px solid #eee;
-            border-radius: 20px;
+            border-radius: 15px;
             background: #f9f9f9;
             font-size: 1rem;
             box-sizing: border-box;
-            transition: 0.3s;
         }
-        .modern-input:focus { border-color: var(--primary); outline: none; background: white; }
 
-        /* [3] Food Cards (PRO LOOK) */
         .food-card {
             display: flex;
             background: white;
-            border-radius: 25px;
-            margin-bottom: 20px;
-            padding: 12px;
-            gap: 15px;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.04);
-            border: 1px solid #f1f1f1;
-            transition: 0.3s;
-        }
-
-        .food-img {
-            width: 110px;
-            height: 110px;
             border-radius: 20px;
-            object-fit: cover;
+            margin-bottom: 15px;
+            padding: 10px;
+            gap: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.04);
+            border: 1px solid #f1f1f1;
         }
 
+        .food-img { width: 90px; height: 90px; border-radius: 15px; object-fit: cover; }
         .food-content { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-        .food-name { font-size: 1.1rem; font-weight: 600; margin: 0; }
-        .food-price { color: var(--primary); font-size: 1.3rem; font-weight: 600; }
+        .food-name { font-size: 1rem; font-weight: 600; margin: 0; }
+        .food-price { color: var(--primary); font-weight: 600; }
 
         .qty-wrapper {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             background: #f1f3f0;
-            border-radius: 12px;
-            padding: 4px 10px;
-            width: fit-content;
+            border-radius: 10px;
+            padding: 2px 8px;
         }
 
-        .btn-qty {
-            border: none;
-            background: none;
-            font-size: 1.5rem;
+        .btn-qty { border: none; background: none; font-size: 1.2rem; color: var(--primary); cursor: pointer; }
+
+        .gps-button {
+            background: #e8f0e9;
             color: var(--primary);
+            border: 1px dashed var(--primary);
+            padding: 12px;
+            border-radius: 15px;
+            width: 100%;
+            margin-bottom: 15px;
             cursor: pointer;
-            padding: 0 5px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
-        /* [4] Action Buttons */
         .btn-action {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 22px;
-            border-radius: 25px;
+            padding: 18px;
+            border-radius: 20px;
             width: 100%;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 10px 20px rgba(61,90,68,0.25);
-            transition: 0.3s;
+            box-shadow: 0 8px 15px rgba(61,90,68,0.2);
         }
-        .btn-action:active { transform: scale(0.96); }
 
         .sticky-footer {
             position: sticky;
             bottom: 0;
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.95);
             backdrop-filter: blur(10px);
             margin: 0 -20px -20px -20px;
-            padding: 20px;
+            padding: 15px 20px;
             border-top: 1px solid #eee;
         }
 
-        /* Animations */
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div class="main-container">
 
-    <!-- หน้าที่ 1: ต้อนรับแบบหรู -->
+    <!-- หน้าที่ 1: ลงทะเบียน -->
     <div id="p1" class="page active">
         <div class="hero">
             <div class="hero-overlay">
-                <h1 style="font-family: 'Playfair Display'; font-size: 3rem; margin: 0;">Nature's Table</h1>
-                <p style="opacity: 0.8; font-weight: 200;">ศิลปะแห่งรสชาติและความสดใหม่</p>
+                <h1 style="font-family: 'Playfair Display'; font-size: 2.5rem; margin: 0;">Nature's Table</h1>
+                <p>รสชาติระดับพรีเมียม ส่งถึงมือคุณ</p>
             </div>
         </div>
         <div class="input-group">
-            <label>คุณลูกค้าชื่ออะไรครับ/ค่ะ?</label>
-            <input type="text" id="custName" class="modern-input" placeholder="กรอกชื่อของคุณ">
+            <label>ชื่อลูกค้า</label>
+            <input type="text" id="custName" class="modern-input" placeholder="ระบุชื่อของคุณ">
         </div>
         <div class="input-group">
-            <label>เบอร์โทรศัพท์สำหรับติดต่อ</label>
+            <label>เบอร์โทรศัพท์</label>
             <input type="tel" id="custTel" class="modern-input" placeholder="09x-xxx-xxxx">
         </div>
-        <button class="btn-action" onclick="go(2)">เริ่มสั่งอาหาร ➔</button>
+        <button class="btn-action" onclick="go(2)">ดูเมนูอาหาร ➔</button>
     </div>
 
-    <!-- หน้าที่ 2: เมนูอาหารแบบ Professional List -->
+    <!-- หน้าที่ 2: เมนูอาหาร -->
     <div id="p2" class="page">
-        <h2 style="font-family: 'Playfair Display'; color: var(--primary); font-size: 2rem; margin-bottom: 5px;">Today's Specials</h2>
-        <p style="color: #888; margin-bottom: 25px;">เลือกเมนูโปรดของคุณได้เลย</p>
+        <h2 style="font-family: 'Playfair Display'; color: var(--primary);">Today's Specials</h2>
         
         <div id="foodList">
-            <!-- รายการอาหารจะถูกใส่ผ่าน JavaScript -->
+            <!-- เมนูจะแสดงที่นี่ -->
         </div>
 
-        <div class="input-group" style="margin-top: 30px;">
-            <label>ระบุพิเศษ (ถ้ามี)</label>
-            <textarea id="note" class="modern-input" style="height: 80px;" placeholder="เช่น ไม่ผัก, เผ็ดน้อย..."></textarea>
+        <button class="gps-button" id="gpsBtn" onclick="getLocation()">
+            📍 <span id="gpsText">กดเพื่อระบุตำแหน่งจัดส่ง (GPS)</span>
+        </button>
+
+        <div class="input-group">
+            <label>เพิ่มเติม/ที่อยู่จัดส่ง</label>
+            <textarea id="note" class="modern-input" style="height: 70px;" placeholder="ระบุรายละเอียดที่อยู่ หรือความต้องการพิเศษ"></textarea>
         </div>
 
         <div class="sticky-footer">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                <span style="color: #666;">ยอดรวมทั้งหมด</span>
-                <span class="food-price" id="totalPrice">0 ฿</span>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span>ยอดรวม</span>
+                <span id="totalPrice" style="font-weight: 600; color: var(--primary);">0 ฿</span>
             </div>
-            <button class="btn-action" onclick="go(3)">ชำระเงิน ➔</button>
+            <button class="btn-action" onclick="go(3)">ไปหน้าชำระเงิน</button>
         </div>
     </div>
 
-    <!-- หน้าที่ 3: ชำระเงินแบบ Clean Look -->
+    <!-- หน้าที่ 3: ชำระเงิน -->
     <div id="p3" class="page">
-        <h2 style="text-align: center;">ยืนยันคำสั่งซื้อ</h2>
-        <div style="background: #f9f9f9; padding: 25px; border-radius: 30px; text-align: center; border: 1px solid #eee;">
-            <p style="margin: 0; color: #666;">สแกนเพื่อจ่ายเงิน</p>
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=PROMPTPAY" style="margin: 20px 0; border-radius: 10px;">
-            <p style="font-size: 0.8rem; color: var(--accent);">* กรุณาแนบสลิปหลังโอนเงิน</p>
-            <input type="file" id="slip" class="modern-input" style="font-size: 0.8rem; margin-top: 10px;">
+        <h2 style="text-align: center;">ชำระเงิน</h2>
+        <div style="background: #f9f9f9; padding: 20px; border-radius: 20px; text-align: center;">
+            <p>สแกน QR เพื่อโอนเงิน</p>
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=PROMPTPAY" style="border-radius: 10px;">
+            <p style="font-size: 0.8rem; color: #888; margin-top: 10px;">แนบสลิปยืนยัน</p>
+            <input type="file" id="slip" class="modern-input">
         </div>
-        <button class="btn-action" style="margin-top: 30px; background: #2d3436;" onclick="confirmOrder()">ยืนยันสั่งซื้อและส่งหลักฐาน ✨</button>
-        <p onclick="go(2)" style="text-align: center; color: #999; margin-top: 20px; cursor: pointer;">⬅ กลับไปหน้าเมนู</p>
+        <button class="btn-action" style="margin-top: 20px;" onclick="confirmOrder()">ยืนยันการสั่งซื้อ ✨</button>
+        <p onclick="go(2)" style="text-align: center; color: #999; margin-top: 15px; cursor: pointer;">ย้อนกลับ</p>
     </div>
 
-    <!-- หน้าที่ 4: ขอบคุณแบบประทับใจ -->
-    <div id="p4" class="page" style="text-align: center; padding-top: 40px;">
-        <div style="background: var(--primary); width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px auto; color: white; font-size: 3rem;">✓</div>
-        <h1 style="font-family: 'Playfair Display'; font-size: 2.5rem; color: var(--primary);">Thank You</h1>
-        <p style="font-size: 1.2rem; color: #666;">เราได้รับคำสั่งซื้อของคุณแล้วครับ/ค่ะ</p>
-        
-        <div style="margin: 40px 0; padding: 30px; background: var(--bg); border-radius: 30px; border: 1px solid #eee; position: relative;">
-            <p style="color: var(--accent); font-weight: 600; margin-top: 0;">ยินดีให้บริการครับ/ค่ะ</p>
-            <p style="font-size: 1.1rem; margin-bottom: 5px;">📞 เบอร์ติดต่อแม่ค้า</p>
-            <p style="font-size: 1.8rem; font-weight: 600; color: var(--primary); margin: 0;">098-xxx-xxx</p>
-            <p style="color: #999; font-size: 0.9rem; margin-top: 15px;">อาหารของคุณกำลังถูกปรุงด้วยความใส่ใจ</p>
+    <!-- หน้าที่ 4: ขอบคุณ -->
+    <div id="p4" class="page" style="text-align: center; padding-top: 50px;">
+        <h1 style="color: var(--primary); font-size: 2.5rem;">สั่งซื้อสำเร็จ!</h1>
+        <div style="padding: 25px; background: #fdfcf9; border-radius: 25px; margin: 20px 0; border: 1px dashed var(--accent);">
+            <p>แม่ค้ากำลังเตรียมอาหารให้คุณ</p>
+            <p style="font-size: 1.2rem; font-weight: 600;">📞 098-xxx-xxx</p>
+            <p style="color: #accent;">ยินดีให้บริการครับ/ค่ะ</p>
         </div>
-
-        <button class="btn-action" onclick="location.reload()" style="background: none; color: var(--primary); border: 2px solid var(--primary); box-shadow: none;">กลับสู่หน้าแรก</button>
+        <button class="btn-action" onclick="location.reload()">กลับหน้าหลัก</button>
     </div>
 
 </div>
 
 <script>
-    // --- FIREBASE CONFIG (ใส่ค่าจริงของคุณตรงนี้) ---
+    // --- 1. ตั้งค่า Firebase (เปลี่ยนเป็นของตัวเอง) ---
     const firebaseConfig = { apiKey: "...", databaseURL: "...", projectId: "..." };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // --- 2. ข้อมูลเมนูอาหาร ---
     const menuData = [
         { id: 'm1', name: 'กะเพราหมูกรอบคลุกฝุ่น', price: 70, img: 'https://images.unsplash.com/photo-1512058560550-42749359a60b?q=80&w=300' },
         { id: 'm2', name: 'พะแนงหมูนุ่มยอดมะพร้าว', price: 65, img: 'https://images.unsplash.com/photo-1559844641-33758223b20e?q=80&w=300' },
@@ -247,9 +235,12 @@
     ];
 
     let cart = {};
+    let userLocation = "ไม่ได้ระบุ GPS";
 
-    function init() {
+    // --- 3. ฟังก์ชันสร้างเมนู (ใช้ DOMContentLoaded เพื่อให้มั่นใจว่าโหลดเมนูแน่ๆ) ---
+    function renderMenu() {
         const list = document.getElementById('foodList');
+        list.innerHTML = ""; // ล้างค่าเก่า
         menuData.forEach(item => {
             cart[item.id] = 0;
             list.innerHTML += `
@@ -257,12 +248,12 @@
                     <img src="${item.img}" class="food-img">
                     <div class="food-content">
                         <p class="food-name">${item.name}</p>
-                        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span class="food-price">${item.price} ฿</span>
                             <div class="qty-wrapper">
-                                <button class="btn-qty" onclick="changeQty('${item.id}', -1)">-</button>
-                                <span id="qty-${item.id}" style="font-weight: 600;">0</span>
-                                <button class="btn-qty" onclick="changeQty('${item.id}', 1)">+</button>
+                                <button class="btn-qty" onclick="updateQty('${item.id}', -1)">-</button>
+                                <span id="qty-${item.id}">0</span>
+                                <button class="btn-qty" onclick="updateQty('${item.id}', 1)">+</button>
                             </div>
                         </div>
                     </div>
@@ -271,37 +262,70 @@
         });
     }
 
-    function changeQty(id, delta) {
+    function updateQty(id, delta) {
         cart[id] = Math.max(0, cart[id] + delta);
         document.getElementById('qty-' + id).innerText = cart[id];
-        let total = menuData.reduce((sum, item) => sum + (cart[item.id] * item.price), 0);
+        calculateTotal();
+    }
+
+    function calculateTotal() {
+        let total = 0;
+        menuData.forEach(item => {
+            total += cart[item.id] * item.price;
+        });
         document.getElementById('totalPrice').innerText = total + " ฿";
     }
 
+    // --- 4. ฟังก์ชัน GPS ---
+    function getLocation() {
+        const gpsText = document.getElementById('gpsText');
+        if (navigator.geolocation) {
+            gpsText.innerText = "กำลังค้นหาตำแหน่ง...";
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    userLocation = `Lat: ${pos.coords.latitude}, Lon: ${pos.coords.longitude}`;
+                    gpsText.innerText = "📍 ปักหมุดสำเร็จ!";
+                    document.getElementById('gpsBtn').style.background = "#d1e7dd";
+                },
+                (err) => {
+                    gpsText.innerText = "ไม่สามารถเข้าถึง GPS ได้";
+                    alert("กรุณาเปิดการเข้าถึงตำแหน่งในเบราว์เซอร์");
+                }
+            );
+        } else {
+            alert("เบราว์เซอร์ไม่รองรับ GPS");
+        }
+    }
+
+    // --- 5. การเปลี่ยนหน้า และ ส่งข้อมูล ---
     function go(page) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById('p' + page).classList.add('active');
-        window.scrollTo(0, 0);
+        window.scrollTo(0,0);
     }
 
     function confirmOrder() {
         const name = document.getElementById('custName').value;
         const tel = document.getElementById('custTel').value;
         const total = document.getElementById('totalPrice').innerText;
+        const note = document.getElementById('note').value;
 
-        if(!name || !tel) return alert("กรุณาระบุชื่อและเบอร์โทรในหน้าแรกครับ");
-        if(total === "0 ฿") return alert("เลือกอาหารสักอย่างก่อนนะครับ");
+        if(!name || !tel) return alert("กรุณากรอกชื่อและเบอร์โทร");
+        if(total === "0 ฿") return alert("กรุณาเลือกอาหาร");
 
         db.ref('orders').push({
             customer: name,
             tel: tel,
             items: cart,
             total: total,
+            location: userLocation, // ส่งพิกัด GPS ไปด้วย
+            note: note,
             time: new Date().toLocaleString()
         }).then(() => go(4));
     }
 
-    init();
+    // เรียกใช้ฟังก์ชันตอนโหลดหน้าเว็บ
+    window.onload = renderMenu;
 </script>
 
 </body>
