@@ -3,478 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nature Gourmet Custom - Premium Edition</title>
+    <title>Nature Gourmet Admin - Super Sonic</title>
     
-    <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     
     <style>
-        /* [1] การตั้งค่าสีและพื้นฐาน */
-        :root { 
-            --p: #2d5a27; /* สีเขียวหลัก */
-            --s: #c5a059; /* สีทอง/น้ำตาล */
-            --bg: #fdfcf9; 
-            --white: #ffffff;
-        }
-
-        body { 
-            font-family: 'Kanit', sans-serif; 
-            background: #f0f0f0; 
-            margin: 0; 
-            color: #333; 
-            overflow-x: hidden;
-        }
-
-        /* [2] กล่องครอบมือถือ */
-        .container { 
-            max-width: 480px; 
-            margin: 0 auto; 
-            background: var(--bg); 
-            min-height: 100vh; 
-            position: relative; 
-            box-shadow: 0 0 30px rgba(0,0,0,0.2); 
-        }
-
-        /* [3] การจัดการหน้า (Fade Effect) */
-        .page { 
-            display: none; 
-            padding: 20px; 
-            animation: fadeIn 0.4s ease-in-out; 
-            box-sizing: border-box;
-        }
-        .active { display: block; }
-
-        @keyframes fadeIn { 
-            from { opacity: 0; transform: translateY(10px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
-
-        /* [4] สไตล์หน้าโปรโมท (1-2) */
-        .promo-container {
-            text-align: center;
-            padding: 0;
-        }
-        .promo-img { 
-            width: 100%; 
-            height: 65vh; 
-            object-fit: cover; 
-            border-radius: 0 0 50px 50px; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        .promo-content {
-            padding: 30px 20px;
-        }
-
-        /* [5] สไตล์ Slider เมนู (คงเดิม) */
-        .slider-container { 
-            display: flex; 
-            overflow-x: auto; 
-            gap: 15px; 
-            padding: 10px 5px; 
-            scroll-snap-type: x mandatory; 
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        .slider-container::-webkit-scrollbar { display: none; }
+        body { font-family: 'Kanit', sans-serif; background: #1a3c15; margin: 0; padding: 15px; color: #333; }
+        .header { text-align: center; color: white; margin-bottom: 20px; }
         
-        .card { 
-            flex: 0 0 180px; 
-            background: white; 
-            border-radius: 15px; 
-            overflow: hidden; 
-            border: 1px solid #eee; 
-            position: relative; 
-            cursor: pointer; 
-            transition: 0.3s; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-        .card:active { transform: scale(0.95); }
-        .card img { width: 100%; height: 130px; object-fit: cover; }
-        .card-info { padding: 10px; text-align: center; }
+        /* ปุ่มเบอร์ฉุกเฉิน */
+        .emergency-bar { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .btn-ems { flex: 1; padding: 12px; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; text-decoration: none; text-align: center; font-size: 1rem; box-shadow: 0 4px 0 rgba(0,0,0,0.2); }
+        .police { background: #2c3e50; } .ambulance { background: #c0392b; } .fire { background: #d35400; }
+
+        .order-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 15px; }
         
-        .stock-tag { 
-            position: absolute; top: 5px; right: 5px; 
-            background: rgba(0,0,0,0.6); color: white; 
-            padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; 
+        .order-card { 
+            background: white; border-radius: 20px; padding: 20px; 
+            box-shadow: 0 8px 15px rgba(0,0,0,0.3); position: relative;
+            border-left: 10px solid #e67e22; animation: slideIn 0.2s ease-out;
         }
-        .qty-tag { 
-            position: absolute; top: 5px; left: 5px; 
-            background: var(--p); color: white; 
-            width: 25px; height: 25px; border-radius: 50%; 
-            display: none; align-items: center; justify-content: center; font-size: 0.8rem; 
-        }
-
-        /* [6] ฟอร์มและปุ่ม */
-        .btn-main { 
-            background: var(--p); color: white; width: 100%; 
-            padding: 16px; border: none; border-radius: 15px; 
-            font-size: 1.1rem; font-weight: 600; cursor: pointer; 
-            margin-top: 15px; transition: 0.2s;
-        }
-        .btn-main:hover { background: #1e3d1a; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
         
-        .custom-box { background: #f0f4f0; padding: 15px; border-radius: 20px; margin-top: 20px; }
+        .status-tag { position: absolute; top: 15px; right: 15px; background: #2d5a27; color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.8rem; }
+        .cust-name { font-size: 1.4rem; color: #1a3c15; font-weight: 600; }
+        .cust-tel { color: #e67e22; font-weight: bold; font-size: 1.2rem; text-decoration: underline; }
         
-        input, textarea { 
-            width: 100%; padding: 14px; margin: 10px 0; 
-            border: 1px solid #ddd; border-radius: 12px; 
-            box-sizing: border-box; font-family: 'Kanit';
-        }
+        .item-box { background: #f9fdf9; padding: 15px; border-radius: 15px; margin: 15px 0; border: 2px solid #eee; }
+        .item-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1.2rem; border-bottom: 1px dashed #ccc; padding-bottom: 5px; }
+        .qty-badge { background: #1a3c15; color: #fff; padding: 2px 12px; border-radius: 8px; font-weight: bold; }
 
-        /* [7] ส่วนที่เพิ่มใหม่: GPS & Payment */
-        .location-section {
-            background: #fff;
-            padding: 15px;
-            border-radius: 15px;
-            border: 2px dashed var(--p);
-            margin: 15px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            cursor: pointer;
-            color: var(--p);
-            font-weight: 600;
-        }
-
-        .pay-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin: 20px 0;
-        }
-        .pay-card {
-            padding: 20px 10px;
-            border: 2px solid #eee;
-            border-radius: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: 0.2s;
-            background: white;
-        }
-        .pay-card.selected {
-            border-color: var(--p);
-            background: #eef7ee;
-            transform: scale(1.05);
-        }
-        .pay-card i { font-size: 1.5rem; display: block; margin-bottom: 5px; }
-
-        .cart-item { 
-            display: flex; justify-content: space-between; 
-            padding: 10px 0; border-bottom: 1px solid #eee; 
-            font-size: 0.95rem; 
-        }
-
-        /* [8] หน้าสุดท้าย */
-        .thai-wai-gif {
-            width: 250px;
-            margin: 20px auto;
-            border-radius: 20px;
-        }
-        .contact-info {
-            background: #fdf5e6;
-            padding: 15px;
-            border-radius: 15px;
-            margin: 20px 0;
-            border: 1px solid #f1c40f;
-        }
+        .btn-done { background: #27ae60; color: white; border: none; width: 100%; padding: 18px; border-radius: 15px; font-size: 1.2rem; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .btn-done:active { transform: scale(0.95); background: #219150; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    
-    <!-- หน้า 1: โปรโมทร้านสวยๆ -->
-    <div id="p1" class="page active promo-container">
-        <!-- ใส่ลิงก์ภาพร้านสวยๆ ตรงนี้ -->
-        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800" class="promo-img" alt="ร้านของเรา">
-        <div class="promo-content">
-            <h1 style="color:var(--p); margin:0;">Nature Gourmet</h1>
-            <p>ยินดีต้อนรับสู่พื้นที่แห่งความอร่อยที่เป็นธรรมชาติ</p>
-            <button class="btn-main" onclick="go(2)">ดูเมนูแนะนำ ➔</button>
-        </div>
+    <div class="header">
+        <h1>ออเดอร์ใหม่ (โหมดความเร็วสูง) ⚡</h1>
     </div>
 
-    <!-- หน้า 2: โปรโมทรูปอาหารน่ากิน -->
-    <div id="p2" class="page promo-container">
-        <!-- ใส่ลิงก์ภาพอาหารน่ากิน ตรงนี้ -->
-        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800" class="promo-img" alt="อาหารน่ากิน">
-        <div class="promo-content">
-            <h2 style="color:var(--p); margin:0;">วัตถุดิบพรีเมียม</h2>
-            <p>เราคัดสรรสิ่งที่ดีที่สุด เพื่อมื้อพิเศษของคุณ</p>
-            <button class="btn-main" onclick="go(3)">เริ่มสั่งอาหารเลย ➔</button>
-        </div>
+    <div class="emergency-bar">
+        <a href="tel:191" class="btn-ems police">🚓 ตำรวจ 191</a>
+        <a href="tel:1669" class="btn-ems ambulance">🚑 กู้ชีพ 1669</a>
+        <a href="tel:199" class="btn-ems fire">🚒 ดับเพลิง 199</a>
     </div>
 
-    <!-- หน้า 3: หน้าถามชื่อและเบอร์ (ย้ายมาจากหน้า 1 เดิม) -->
-    <div id="p3" class="page" style="padding-top: 50px;">
-        <div style="text-align:center;">
-            <span style="font-size: 4rem;">📝</span>
-            <h2 style="color: var(--p);">ข้อมูลผู้สั่งอาหาร</h2>
-            <p>เพื่อให้แม่ค้าจัดส่งและติดต่อได้ถูกต้องครับ</p>
-        </div>
-        <div style="margin-top: 30px;">
-            <label>ชื่อผู้สั่ง:</label>
-            <input type="text" id="custName" placeholder="ระบุชื่อเล่น หรือ ชื่อจริง">
-            <label>เบอร์โทรศัพท์:</label>
-            <input type="tel" id="custTel" placeholder="09X-XXX-XXXX">
-            <button class="btn-main" onclick="validateStep3()">เข้าสู่เมนูอาหาร ➔</button>
-        </div>
+    <div class="order-grid" id="order-display">
+        <!-- ออเดอร์จะเด้งเข้าตรงนี้ทันที -->
     </div>
 
-    <!-- หน้า 4: หน้าเลือกอาหาร (หน้า 2 เดิม + GPS) -->
-    <div id="p4" class="page">
-        <!-- [ใส่พิกัดร้านตรงนี้] เปลี่ยนลิงก์หลัง ?q= เป็นที่อยู่ร้านพี่ -->
-        <div class="location-section" onclick="window.open('https://www.google.com/maps/search/?api=1&query=Nature+Gourmet+Bangkok', '_blank')">
-            <span>📍 พิกัดร้าน: กดดูแผนที่มาร้านเราได้ที่นี่</span>
-        </div>
-
-        <h3 style="border-left: 5px solid var(--p); padding-left: 10px;">1. เลือกเมนูหลัก</h3>
-        <div class="slider-container" id="main-menu"></div>
-        
-        <div class="custom-box">
-            <h3 style="margin-top:0;">2. วัตถุดิบพิเศษ (Add-on)</h3>
-            <p style="font-size:0.8rem; color: #666;">คลิกเพื่อเลือก และระบุวิธีปรุงด้านล่าง</p>
-            <div class="slider-container" id="ingredient-menu"></div>
-            <textarea id="cookMethod" rows="3" placeholder="ระบุวิธีทำเพิ่มเติม เช่น เผ็ดน้อย, ไม่ใส่กระเทียม, หั่นพอดีคำ..."></textarea>
-        </div>
-
-        <div style="margin-top: 25px; background: white; padding: 20px; border-radius: 20px; border-top: 4px solid var(--p);">
-            <h4 style="margin:0 0 10px 0;">สรุปรายการที่เลือก:</h4>
-            <div id="cart-summary"></div>
-            <div style="display:flex; justify-content: space-between; font-weight: 700; font-size: 1.3rem; margin-top: 15px; border-top: 2px solid #eee; padding-top: 10px;">
-                <span>ยอดรวมทั้งหมด:</span>
-                <span id="totalPrice" style="color:var(--p)">0 ฿</span>
-            </div>
-            <button class="btn-main" onclick="go(5)">ไปที่หน้าชำระเงิน ➔</button>
-            <button class="btn-main" style="background:#eee; color:#666;" onclick="go(3)">ย้อนกลับ</button>
-        </div>
-    </div>
-
-    <!-- หน้า 5: หน้าชำระเงิน -->
-    <div id="p5" class="page">
-        <h2 style="text-align:center; color: var(--p);">วิธีการชำระเงิน</h2>
-        
-        <div class="pay-grid">
-            <div class="pay-card" id="opt-cash" onclick="selectPay('cash')">
-                <span>💵</span><br>เงินสด
-            </div>
-            <div class="pay-card" id="opt-scan" onclick="selectPay('scan')">
-                <span>📱</span><br>แสกนจ่าย
-            </div>
-        </div>
-
-        <!-- โซนโอนเงิน -->
-        <div id="scan-area" style="display:none; text-align:center; background:#fff; padding:20px; border-radius:25px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);">
-            <p>ยอดที่ต้องโอนชำระ</p>
-            <h2 id="payTotal" style="font-size:2.2rem; color:var(--p); margin: 10px 0;">0 ฿</h2>
-            <!-- [ส่วนรูป QR Code] สามารถใช้ลิงก์ PromptPay จริงได้ที่นี่ -->
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=0987654321" style="border: 5px solid #fff; border-radius:15px;" alt="QR Code Payment">
-            <p style="font-size:0.85rem; color:#888; margin-top:15px;">โอนแล้วอย่าลืมแนบสลิปด้านล่างนะครับ</p>
-            <input type="file" id="slipFile" accept="image/*" style="border: 1px dashed #ccc;">
-        </div>
-
-        <!-- โซนเงินสด -->
-        <div id="cash-area" style="display:none; text-align:center; padding:30px; border-radius:25px; background: #fff;">
-            <span style="font-size: 3rem;">🤝</span>
-            <p>ชำระเงินสดที่หน้าร้านเมื่อได้รับอาหาร</p>
-            <h2 id="cashTotal" style="color:var(--p)">0 ฿</h2>
-        </div>
-
-        <button id="finalConfirmBtn" class="btn-main" style="margin-top:30px;" onclick="confirmOrder()">ยืนยันออเดอร์ & ส่งข้อมูล ✨</button>
-        <button class="btn-main" style="background:#ccc" onclick="go(4)">กลับไปแก้ไขออเดอร์</button>
-    </div>
-
-    <!-- หน้า 6: หน้าขอบคุณ (Final Page) -->
-    <div id="p6" class="page" style="text-align:center; padding-top:40px;">
-        <h1 style="color: var(--p); font-size: 2.5rem;">สำเร็จเรียบร้อย!</h1>
-        
-        <!-- [รูปเคลื่อนไหวชายหญิงไหว้] ใช้ GIF พรีเมียม -->
-        <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3N5Ym5xdjR2Z3Z6Z3Z6Z3Z6Z3Z6Z3Z6Z3Z6Z3Z6Z3Z6Z3Z6Z3Z6Z3Z6JlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/l2JhORT5IF4xIKuS4/giphy.gif" class="thai-wai-gif" alt="ขอบคุณครับ">
-        
-        <div style="padding: 0 20px;">
-            <h2 style="margin-bottom: 5px;">ขอบคุณครับ / ขอบคุณค่ะ</h2>
-            <p>ออเดอร์ของคุณถูกส่งถึงมือแม่ค้าแล้วน้าา</p>
-            
-            <div class="contact-info">
-                <strong>📞 ติดต่อสอบถาม/ตามอาหาร:</strong><br>
-                <span style="font-size: 1.4rem; color: #e67e22; font-weight: bold;">098-XXX-XXXX</span><br>
-                <small>(แม่ค้าใจดี โทรได้ตลอดเลยจ้า)</small>
-            </div>
-        </div>
-
-        <button class="btn-main" style="background: #333;" onclick="exitApp()">ออกจากหน้าสั่งซื้อ ✨</button>
-        <p style="color: #bbb; font-size: 0.8rem; margin-top: 20px;">ระบบจัดการโดย Nature Gourmet Cloud</p>
-    </div>
-</div>
+    <audio id="ding-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
 
 <script>
-    /* =========================================
-       [SECTION 1: FIREBASE CONFIG]
-       ========================================= */
+    // [1] Mapping ชื่อเมนู (ใส่ให้ตรงกับหน้าสั่งนะพี่)
+    const menuMapping = {
+        'f1': 'กะเพราหมูกรอบ',
+        'f2': 'ข้าวผัดต้มยำ',
+        'f3': 'ผัดไทยกุ้งสด',
+        'i1': 'ผักชี (พิเศษ)',
+        'i2': 'พริกสด',
+        'i3': 'ไข่ดาว',
+        'i4': 'ไข่เจียว'
+    };
+
+    // [2] Firebase Config (แก้เป็นของพี่นะ)
     const firebaseConfig = {
-        apiKey: "AIza...", 
-        databaseURL: "https://your-db-url.firebaseio.com", // เปลี่ยนเป็น URL ของพี่
+        apiKey: "AIza...",
+        databaseURL: "https://your-db-url.asia-southeast1.firebasedatabase.app", 
         projectId: "your-project-id"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    /* =========================================
-       [SECTION 2: DATA SETUP]
-       ========================================= */
-    const mainFoods = [
-        { id: 'f1', name: 'กะเพราหมูกรอบ', price: 70, stock: 10, img: 'https://images.unsplash.com/photo-1555126634-323283e090fa?w=300' },
-        { id: 'f2', name: 'ข้าวผัดต้มยำ', price: 85, stock: 5, img: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=300' },
-        { id: 'f3', name: 'ผัดไทยกุ้งสด', price: 90, stock: 8, img: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=300' }
-    ];
+    const orderDisplay = document.getElementById('order-display');
+    const dingSound = document.getElementById('ding-sound');
 
-    const ingredients = [
-        { id: 'i1', name: 'ผักชี', price: 5, stock: 10, img: 'https://images.unsplash.com/photo-1588873281272-13963435639f?w=300' },
-        { id: 'i2', name: 'พริกสด', price: 2, stock: 15, img: 'https://images.unsplash.com/photo-1588253518679-119c3136782a?w=300' },
-        { id: 'i3', name: 'ไข่ดาว', price: 10, stock: 20, img: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=300' },
-        { id: 'i4', name: 'ไข่เจียว', price: 10, stock: 15, img: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=300' }
-    ];
-
-    let cart = {}; 
-    let selectedPayMethod = "";
-
-    /* =========================================
-       [SECTION 3: CORE FUNCTIONS]
-       ========================================= */
-    
-    // ฟังก์ชันวาดรายการอาหาร
-    function renderList(data, containerId) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = data.map(item => {
-            cart[item.id] = 0;
-            return `
-                <div class="card" onclick="addToCart('${item.id}', ${item.stock})">
-                    <div class="stock-tag" id="stock-${item.id}">คงเหลือ ${item.stock}</div>
-                    <div class="qty-tag" id="qty-${item.id}">0</div>
-                    <img src="${item.img}">
-                    <div class="card-info">
-                        <strong>${item.name}</strong><br>
-                        <span style="color:var(--p)">${item.price} ฿</span>
-                    </div>
-                </div>
-            `;
-        }).join('');
+    // เสียงผู้หญิงพูด (หวานและเร็ว)
+    function speakCancel() {
+        const msg = new SpeechSynthesisUtterance("มีคนยกเลิกออเดอร์ค่ะ");
+        msg.lang = 'th-TH';
+        msg.rate = 1.1; 
+        msg.pitch = 1.2;
+        window.speechSynthesis.speak(msg);
     }
 
-    // ฟังก์ชันเพิ่มลงตระกร้า
-    function addToCart(id, maxStock) {
-        if (cart[id] < maxStock) {
-            cart[id]++;
-            const qtyTag = document.getElementById(`qty-${id}`);
-            qtyTag.innerText = cart[id];
-            qtyTag.style.display = 'flex';
-            calculateTotal();
-        } else {
-            alert("⚠️ ขออภัยครับ ของชิ้นนี้หมดสต็อกแล้ว");
+    // [3] เทคนิคการโหลดแบบ "ทันที" (Child Added)
+    // วิธีนี้จะเร็วกว่า 'on value' เพราะมันจะไม่รอให้โหลดครบทุกอันถึงค่อยแสดงผล
+    let initialDataLoaded = false;
+
+    db.ref('orders').on('child_added', (snapshot) => {
+        const key = snapshot.key;
+        const order = snapshot.val();
+        renderOrderCard(key, order, true); // วาดการ์ดใหม่ไว้บนสุด
+
+        if (initialDataLoaded) {
+            dingSound.play().catch(() => {}); // เสียงติ๊ง
         }
-    }
+    });
 
-    // ฟังก์ชันคำนวณเงิน
-    function calculateTotal() {
-        let total = 0;
-        let summaryHtml = "";
-        [...mainFoods, ...ingredients].forEach(item => {
-            if (cart[item.id] > 0) {
-                total += cart[item.id] * item.price;
-                summaryHtml += `
-                    <div class="cart-item">
-                        <span>${item.name} x ${cart[item.id]}</span>
-                        <span>${cart[item.id] * item.price} ฿</span>
+    db.ref('orders').on('child_removed', (snapshot) => {
+        const card = document.getElementById(`card-${snapshot.key}`);
+        if (card) {
+            card.remove();
+            speakCancel(); // เสียงแจ้งเตือนยกเลิก
+        }
+    });
+
+    // ตรวจสอบว่าโหลดครั้งแรกเสร็จหรือยัง (เพื่อไม่ให้เสียงดังรัวๆ ตอนเปิดหน้า)
+    db.ref('orders').once('value', () => {
+        initialDataLoaded = true;
+        if (orderDisplay.innerHTML === "") {
+            orderDisplay.innerHTML = `<div id="empty-msg" style="color: white; text-align: center; grid-column: 1/-1; padding: 50px;">ไม่มีออเดอร์ค้างค่ะ 😇</div>`;
+        }
+    });
+
+    function renderOrderCard(key, order, isNew = false) {
+        // ลบข้อความ "ไม่มีออเดอร์" ออกถ้ามีการ์ดใหม่เข้า
+        const emptyMsg = document.getElementById('empty-msg');
+        if (emptyMsg) emptyMsg.remove();
+
+        const date = new Date(order.timestamp).toLocaleTimeString('th-TH');
+        let itemsHtml = "";
+        
+        for (let id in order.items) {
+            if (order.items[id] > 0) {
+                const name = menuMapping[id] || id;
+                itemsHtml += `
+                    <div class="item-row">
+                        <span>${name}</span>
+                        <span class="qty-badge">${order.items[id]}</span>
                     </div>`;
             }
-        });
-        document.getElementById('totalPrice').innerText = total + " ฿";
-        document.getElementById('payTotal').innerText = total + " ฿";
-        document.getElementById('cashTotal').innerText = total + " ฿";
-        document.getElementById('cart-summary').innerHTML = summaryHtml;
-    }
-
-    // ฟังก์ชันเลือกวิธีจ่ายเงิน
-    function selectPay(method) {
-        selectedPayMethod = method;
-        document.getElementById('opt-cash').classList.remove('selected');
-        document.getElementById('opt-scan').classList.remove('selected');
-        document.getElementById('opt-' + method).classList.add('selected');
-        
-        document.getElementById('scan-area').style.display = method === 'scan' ? 'block' : 'none';
-        document.getElementById('cash-area').style.display = method === 'cash' ? 'block' : 'none';
-    }
-
-    // ฟังก์ชันสลับหน้า
-    function go(page) {
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        document.getElementById('p' + page).classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // ฟังก์ชันเช็คชื่อก่อนไปต่อ
-    function validateStep3() {
-        const n = document.getElementById('custName').value;
-        const t = document.getElementById('custTel').value;
-        if (n.length < 2 || t.length < 9) {
-            alert("กรุณากรอกชื่อและเบอร์โทรให้ถูกต้องก่อนนะครับ");
-            return;
         }
-        go(4);
-    }
 
-    /* =========================================
-       [SECTION 4: FINAL ACTION]
-       ========================================= */
-    
-    // ฟังก์ชันยืนยันออเดอร์
-    function confirmOrder() {
-        if (!selectedPayMethod) return alert("โปรดเลือกวิธีชำระเงินก่อนครับ");
-        if (document.getElementById('totalPrice').innerText === "0 ฿") return alert("ยังไม่ได้เลือกเมนูเลยครับ");
+        const cardHtml = `
+            <div class="order-card" id="card-${key}">
+                <div class="status-tag">${order.payment_type === 'scan' ? '📱 โอนเงิน' : '💵 เงินสด'}</div>
+                <div class="cust-name">คุณ ${order.customer}</div>
+                <a href="tel:${order.tel}" class="cust-tel">📞 ${order.tel}</a>
+                
+                <div class="item-box">
+                    ${itemsHtml}
+                    <div style="color: #e67e22; font-size: 0.95rem; margin-top: 10px; font-weight: bold;">
+                        📌 โน้ต: ${order.cooking_instruction || '-'}
+                    </div>
+                </div>
+                
+                <div style="text-align: right; font-size: 1.3rem; font-weight: bold; color: #1a3c15;">
+                    ยอดสุทธิ: ${order.total_price}
+                </div>
+                
+                <button class="btn-done" onclick="finishOrder('${key}')">✅ ทำเสร็จแล้ว</button>
+            </div>
+        `;
 
-        const btn = document.getElementById('finalConfirmBtn');
-        btn.disabled = true;
-        btn.innerText = "กำลังบันทึกข้อมูล...";
-
-        const orderData = {
-            customer: document.getElementById('custName').value,
-            tel: document.getElementById('custTel').value,
-            items: cart,
-            cooking_instruction: document.getElementById('cookMethod').value,
-            total_price: document.getElementById('totalPrice').innerText,
-            payment_type: selectedPayMethod,
-            status: "ใหม่",
-            timestamp: firebase.database.ServerValue.TIMESTAMP
-        };
-
-        // [จุดเปลี่ยนสำคัญ] 
-        // สั่งให้ส่งข้อมูลเข้า Firebase (มันจะทำอยู่เบื้องหลัง)
-        db.ref('orders').push(orderData); 
-        
-        // สั่งให้เปลี่ยนไปหน้า 6 ทันที ไม่ต้องรอ Server ตอบกลับมา
-        // ลูกค้าจะรู้สึกว่ากดแล้วเสร็จเลยใน 1 วินาที!
-        go(6); 
-    }
-
-    // ฟังก์ชันออกจากแอป
-    function exitApp() {
-        // สำหรับ Web App ทั่วไปจะทำการรีโหลดหน้ากลับไปหน้าแรกสุด
-        if (confirm("ต้องการกลับไปหน้าหลักใช่ไหมครับ?")) {
-            location.reload();
+        if (isNew) {
+            orderDisplay.insertAdjacentHTML('afterbegin', cardHtml); // เอาไว้บนสุด
+        } else {
+            orderDisplay.innerHTML += cardHtml;
         }
     }
 
-    // เริ่มต้นระบบเมื่อโหลดหน้าเสร็จ
-    window.onload = () => {
-        renderList(mainFoods, 'main-menu');
-        renderList(ingredients, 'ingredient-menu');
-        console.log("System Ready - Nature Gourmet");
-    };
+    function finishOrder(key) {
+        if (confirm("ทำออเดอร์นี้เสร็จแล้วใช่ไหมคะ?")) {
+            db.ref('orders/' + key).remove();
+        }
+    }
 </script>
 </body>
 </html>
