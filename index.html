@@ -439,7 +439,7 @@
 
         const btn = document.getElementById('finalConfirmBtn');
         btn.disabled = true;
-        btn.innerText = "กำลังส่งข้อมูล...";
+        btn.innerText = "กำลังบันทึกข้อมูล...";
 
         const orderData = {
             customer: document.getElementById('custName').value,
@@ -452,16 +452,13 @@
             timestamp: firebase.database.ServerValue.TIMESTAMP
         };
 
-        // ส่งเข้า Firebase
-        db.ref('orders').push(orderData)
-            .then(() => {
-                go(6);
-            })
-            .catch(err => {
-                alert("เกิดข้อผิดพลาด: " + err.message);
-                btn.disabled = false;
-                btn.innerText = "ลองใหม่อีกครั้ง";
-            });
+        // [จุดเปลี่ยนสำคัญ] 
+        // สั่งให้ส่งข้อมูลเข้า Firebase (มันจะทำอยู่เบื้องหลัง)
+        db.ref('orders').push(orderData); 
+        
+        // สั่งให้เปลี่ยนไปหน้า 6 ทันที ไม่ต้องรอ Server ตอบกลับมา
+        // ลูกค้าจะรู้สึกว่ากดแล้วเสร็จเลยใน 1 วินาที!
+        go(6); 
     }
 
     // ฟังก์ชันออกจากแอป
