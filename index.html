@@ -3,593 +3,601 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nature Gourmet - Premium Ordering System</title>
+    <title>Nature Gourmet - Ultra Premium Bespoke 2026</title>
     
-    <!-- External Libraries -->
+    <!-- [1] EXTERNAL RESOURCES - เสริมความแกร่ง -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script> <!-- Library สำหรับแอนิเมชั่นลื่นๆ -->
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* =========================================
-           CORE SYSTEM STYLES (TEXTURE PRESERVATION)
-           ========================================= */
+        /* [2] DESIGN TOKENS - เฉดสีที่สวยที่สุด (Deep Forest & Luxury Gold) */
         :root {
-            --primary-color: #2d5a27;
-            --secondary-color: #c5a059;
-            --accent-color: #e67e22;
-            --bg-color: #fdfcf9;
+            --p: #1a3c15; /* Deep Green */
+            --p-light: #2d5a27;
+            --p-soft: #eef7ee;
+            --s: #c5a059; /* Champagne Gold */
+            --s-dark: #a67c37;
             --white: #ffffff;
-            --gray-light: #f4f4f4;
-            --gray-dark: #333333;
-            --shadow: 0 10px 30px rgba(0,0,0,0.1);
-            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --black: #1a1a1a;
+            --glass: rgba(255, 255, 255, 0.8);
+            --blur: blur(15px);
+            --shadow-sm: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 15px 35px rgba(0,0,0,0.15);
+            --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
 
-        * {
-            -webkit-tap-highlight-color: transparent;
-            box-sizing: border-box;
+        /* [3] GLOBAL STYLES */
+        * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; outline: none; }
+        
+        body { 
+            font-family: 'Kanit', sans-serif; 
+            margin: 0; 
+            background: #f8f9fa; 
+            color: var(--black);
+            overflow-x: hidden;
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            transition: var(--transition);
         }
 
-        body {
-            font-family: 'Kanit', sans-serif;
-            background-color: #eeeeee;
-            margin: 0;
-            padding: 0;
-            color: var(--gray-dark);
-            line-height: 1.6;
-        }
-
-        .main-wrapper {
+        .app-container {
             max-width: 500px;
             margin: 0 auto;
-            background-color: var(--bg-color);
             min-height: 100vh;
+            background: var(--glass);
+            backdrop-filter: var(--blur);
             position: relative;
-            box-shadow: 0 0 50px rgba(0,0,0,0.15);
-            overflow-x: hidden;
-        }
-
-        /* ปุ่มรีเฟรชพิเศษ (Refresh Button) */
-        .refresh-btn {
-            position: fixed;
-            top: 15px;
-            right: 15px;
-            z-index: 999;
-            background: rgba(255, 255, 255, 0.9);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            box-shadow: var(--shadow-lg);
             display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary-color);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            cursor: pointer;
-            transition: var(--transition);
-            border: 1px solid #ddd;
-        }
-        .refresh-btn:active { transform: rotate(180deg) scale(0.9); }
-
-        /* ระบบหน้าจอ (Page System) */
-        .page {
-            display: none;
-            padding: 20px;
-            min-height: 100vh;
-            animation: slideIn 0.4s ease-out;
-        }
-        .page.active { display: block; }
-
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(30px); }
-            to { opacity: 1; transform: translateX(0); }
+            flex-direction: column;
         }
 
-        /* -----------------------------------------
-           UI COMPONENTS 
-           ----------------------------------------- */
-        
-        /* Banner Section */
-        .hero-banner {
-            margin: -20px -20px 20px -20px;
-            position: relative;
-            height: 60vh;
-            overflow: hidden;
-            border-bottom-right-radius: 80px;
-            box-shadow: var(--shadow);
-        }
-        .hero-banner img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .hero-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 40px 20px;
-            background: linear-gradient(transparent, rgba(0,0,0,0.8));
-            color: white;
-            text-align: center;
+        /* [4] TOP NAVIGATION & VIP HUD */
+        .header-hud {
+            position: sticky; top: 0; z-index: 100;
+            padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            background: transparent;
         }
 
-        /* Cards & Sliders */
-        .section-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin: 25px 0 15px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .section-title::before {
-            content: '';
-            width: 4px;
-            height: 20px;
-            background: var(--primary-color);
-            border-radius: 2px;
-        }
-
-        .horizontal-slider {
-            display: flex;
-            overflow-x: auto;
-            gap: 15px;
-            padding: 5px 5px 15px 5px;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-        }
-        .horizontal-slider::-webkit-scrollbar { display: none; }
-
-        .food-card {
-            flex: 0 0 180px;
+        .vip-status-box {
             background: var(--white);
-            border-radius: 20px;
-            overflow: hidden;
-            border: 1px solid #f0f0f0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            position: relative;
-            transition: var(--transition);
+            padding: 8px 16px;
+            border-radius: 30px;
+            display: flex; align-items: center; gap: 12px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(255,255,255,0.5);
             cursor: pointer;
+            transition: var(--transition);
         }
-        .food-card:active { transform: scale(0.96); }
-        .food-card img { width: 100%; height: 130px; object-fit: cover; }
-        .food-card-body { padding: 12px; text-align: center; }
-        .food-name { font-weight: 500; font-size: 0.95rem; margin-bottom: 5px; }
-        .food-price { color: var(--primary-color); font-weight: 600; }
-        
-        .quantity-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background: var(--primary-color);
-            color: white;
-            width: 28px;
-            height: 28px;
+
+        .vip-status-box:active { transform: scale(0.95); }
+
+        .vip-icon-wrapper {
+            width: 35px; height: 35px;
+            background: var(--p-soft);
             border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem;
         }
 
-        /* Form Inputs */
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: #666; }
-        input[type="text"], input[type="tel"], textarea {
-            width: 100%;
-            padding: 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 15px;
-            background: #fff;
-            font-family: 'Kanit';
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            background: #fdfdfd;
-        }
-
-        /* Buttons */
-        .btn-container { padding: 10px 0; }
-        .btn-primary {
-            background: var(--primary-color);
-            color: white;
-            width: 100%;
-            padding: 18px;
-            border: none;
-            border-radius: 18px;
-            font-size: 1.1rem;
-            font-weight: 600;
+        .theme-toggle-btn {
+            width: 45px; height: 45px;
+            background: var(--white);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-sm);
             cursor: pointer;
-            box-shadow: 0 6px 20px rgba(45, 90, 39, 0.3);
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            color: var(--p);
+            font-size: 1.3rem;
         }
-        .btn-primary:active { transform: translateY(2px); box-shadow: none; }
 
-        /* Payment UI */
-        .payment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
-        .payment-option {
-            background: white;
-            padding: 20px 10px;
-            border-radius: 20px;
-            border: 2px solid #f0f0f0;
-            text-align: center;
-            transition: var(--transition);
-            cursor: pointer;
+        /* [5] THEME CUSTOMIZER PANEL (ลูกค้าแต่งเอง) */
+        .theme-panel {
+            position: fixed; bottom: -100%; left: 50%;
+            transform: translateX(-50%);
+            width: 100%; max-width: 500px;
+            background: var(--white);
+            border-radius: 40px 40px 0 0;
+            padding: 35px;
+            z-index: 2000;
+            box-shadow: 0 -10px 50px rgba(0,0,0,0.2);
+            transition: bottom 0.6s cubic-bezier(0.19, 1, 0.22, 1);
         }
-        .payment-option i { font-size: 2rem; margin-bottom: 10px; color: #ccc; }
-        .payment-option.selected {
-            border-color: var(--primary-color);
-            background: #f0f7f0;
-        }
-        .payment-option.selected i { color: var(--primary-color); }
 
-        /* Summary Area */
-        .summary-box {
-            background: white;
+        .theme-panel.open { bottom: 0; }
+
+        .color-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin: 20px 0;
+        }
+
+        .color-dot {
+            height: 40px; border-radius: 50%; cursor: pointer; border: 3px solid transparent;
+            transition: var(--transition);
+        }
+
+        .color-dot.active { border-color: var(--s); transform: scale(1.2); }
+
+        /* [6] PAGE SYSTEM */
+        .page { display: none; padding: 20px; flex: 1; }
+        .page.active { display: block; animation: pageEnter 0.5s ease forwards; }
+        
+        @keyframes pageEnter {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* [7] PREMIUM COMPONENTS */
+        .hero-image {
+            width: 100%; height: 55vh;
+            object-fit: cover;
+            border-bottom-left-radius: 100px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-premium {
+            background: var(--p);
+            color: var(--white);
             padding: 20px;
             border-radius: 25px;
-            margin: 20px 0;
-            border: 1px solid #f0f0f0;
-        }
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px dashed #eee;
-            font-size: 0.95rem;
-        }
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 15px;
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--primary-color);
-        }
-
-        /* Ending Page Styles */
-        .ending-content { text-align: center; padding: 40px 10px; }
-        .thank-you-gif {
+            border: none;
+            font-size: 1.2rem;
+            font-weight: 600;
             width: 100%;
-            max-width: 300px;
-            border-radius: 30px;
-            margin: 20px auto;
-            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 0 10px 25px -5px var(--p);
         }
-        .contact-card {
-            background: linear-gradient(135deg, var(--primary-color), #1e3d1a);
-            color: white;
-            padding: 30px 20px;
+
+        .btn-premium:hover { transform: translateY(-3px); box-shadow: 0 15px 30px -5px var(--p); }
+        .btn-premium:active { transform: translateY(1px); }
+
+        .menu-slider {
+            display: flex; overflow-x: auto; gap: 20px; padding: 15px 5px;
+            scrollbar-width: none;
+        }
+        .menu-slider::-webkit-scrollbar { display: none; }
+
+        .food-card {
+            flex: 0 0 220px;
+            background: var(--white);
             border-radius: 30px;
-            margin: 30px 0;
-            position: relative;
             overflow: hidden;
-        }
-        .contact-card h2 { font-size: 2rem; margin: 10px 0; }
-        .contact-card::after {
-            content: '\f095';
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900;
-            position: absolute;
-            right: -20px;
-            bottom: -20px;
-            font-size: 8rem;
-            opacity: 0.1;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid rgba(0,0,0,0.03);
+            position: relative;
         }
 
-        /* Utils */
-        .text-center { text-align: center; }
-        .mt-20 { margin-top: 20px; }
-        .mb-20 { margin-bottom: 20px; }
+        .food-card img { width: 100%; height: 160px; object-fit: cover; }
+        
+        .food-card:hover { transform: translateY(-10px); box-shadow: var(--shadow-lg); }
 
+        .price-tag {
+            background: var(--p-soft);
+            color: var(--p);
+            padding: 5px 15px;
+            border-radius: 15px;
+            font-weight: 700;
+        }
+
+        .cart-badge {
+            position: absolute; top: 15px; left: 15px;
+            background: var(--p); color: var(--white);
+            width: 35px; height: 35px; border-radius: 50%;
+            display: none; align-items: center; justify-content: center;
+            font-weight: 700; border: 3px solid var(--white);
+        }
+
+        /* [8] VIP LEVEL SPECIAL EFFECTS */
+        .rank-glow {
+            position: relative; overflow: hidden;
+        }
+        .rank-glow::after {
+            content: ''; position: absolute; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: rotate(45deg);
+            animation: glowSweep 3s infinite;
+        }
+        @keyframes glowSweep {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* [9] INPUT STYLES */
+        .modern-input {
+            width: 100%; padding: 20px; border-radius: 20px;
+            border: 2px solid #eee; margin-bottom: 20px;
+            font-family: 'Kanit'; font-size: 1.1rem;
+            transition: var(--transition);
+        }
+        .modern-input:focus { border-color: var(--p); background: var(--p-soft); }
+
+        /* [10] PAYMENT SELECTION */
+        .payment-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 30px 0;
+        }
+        .payment-card {
+            background: var(--white); border: 2px solid #eee;
+            padding: 25px; border-radius: 25px; text-align: center;
+            cursor: pointer; transition: var(--transition);
+        }
+        .payment-card.selected {
+            border-color: var(--p); background: var(--p-soft);
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
 
-    <div class="main-wrapper">
-        <!-- ปุ่มรีเฟรช -->
-        <div class="refresh-btn" onclick="location.reload()" title="เริ่มใหม่">
-            <i class="fas fa-sync-alt"></i>
+<div class="app-container" id="mainApp">
+    
+    <!-- HEADER HUD -->
+    <div class="header-hud">
+        <div class="theme-toggle-btn" onclick="openThemePanel()">
+            <i class="fas fa-palette"></i>
         </div>
-
-        <!-- หน้า 1: Landing Page -->
-        <div id="page1" class="page active">
-            <div class="hero-banner">
-                <img src="https://images.unsplash.com/photo-1547592166-23ac45744acd?w=800">
-                <div class="hero-overlay">
-                    <h1 style="margin:0; font-weight:600; font-size:2.2rem;">Nature Gourmet</h1>
-                    <p style="opacity:0.9; font-weight:300;">Experience the art of natural cooking</p>
-                </div>
+        <div class="vip-status-box" onclick="showVipInfo()">
+            <div class="vip-icon-wrapper" id="vipIcon">
+                <i class="fas fa-seedling"></i>
             </div>
-            <div style="padding: 20px;">
-                <div class="text-center">
-                    <h2 style="color:var(--primary-color);">ยินดีต้อนรับ</h2>
-                    <p>คัดสรรวัตถุดิบชั้นดี เพื่อเมนูที่พิเศษที่สุดสำหรับคุณ</p>
-                </div>
-                <button class="btn-primary" onclick="navigateTo(2)">
-                    เริ่มการสั่งอาหาร <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- หน้า 2: Customer Identity -->
-        <div id="page2" class="page">
-            <div class="text-center mb-20">
-                <i class="fas fa-user-circle" style="font-size: 4rem; color: var(--primary-color);"></i>
-                <h2>ระบุข้อมูลผู้สั่ง</h2>
-                <p>เพื่อความถูกต้องในการจัดส่งและแจ้งสถานะ</p>
-            </div>
-            <div class="input-group">
-                <label><i class="fas fa-signature"></i> ชื่อ-นามสกุล หรือ ชื่อเล่น</label>
-                <input type="text" id="cust_name" placeholder="ระบุชื่อของคุณที่นี่...">
-            </div>
-            <div class="input-group">
-                <label><i class="fas fa-phone-alt"></i> เบอร์โทรศัพท์ที่ติดต่อได้</label>
-                <input type="tel" id="cust_tel" placeholder="08X-XXX-XXXX">
-            </div>
-            <div class="mt-20">
-                <button class="btn-primary" onclick="checkStep2()">
-                    ถัดไป <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- หน้า 3: Menu Selection -->
-        <div id="page3" class="page">
-            <div class="section-title">เลือกเมนูอาหารของคุณ</div>
-            <div class="horizontal-slider" id="main-menu-container">
-                <!-- ดึงข้อมูลจาก JS -->
-            </div>
-
-            <div class="section-title">เพิ่มความพิเศษ (Add-on)</div>
-            <div class="horizontal-slider" id="extra-menu-container">
-                <!-- ดึงข้อมูลจาก JS -->
-            </div>
-
-            <div class="section-title">คำแนะนำพิเศษถึงเชฟ</div>
-            <textarea id="order_note" rows="3" placeholder="ระบุรายละเอียด เช่น ไม่ผัก / เผ็ดน้อย / แพ้กุ้ง..."></textarea>
-
-            <div class="summary-box">
-                <h4 style="margin-top:0;"><i class="fas fa-shopping-cart"></i> สรุปออเดอร์</h4>
-                <div id="item-list"></div>
-                <div class="total-row">
-                    <span>ยอดรวมสุทธิ</span>
-                    <span id="total-amount">0 ฿</span>
-                </div>
-            </div>
-
-            <button class="btn-primary" onclick="navigateTo(4)">
-                ไปหน้าชำระเงิน <i class="fas fa-credit-card"></i>
-            </button>
-            <button style="background:none; border:none; color:#999; width:100%; margin-top:15px; cursor:pointer;" onclick="navigateTo(2)">
-                ย้อนกลับไปแก้ไขชื่อ
-            </button>
-        </div>
-
-        <!-- หน้า 4: Payment -->
-        <div id="page4" class="page">
-            <div class="text-center">
-                <h2>การชำระเงิน</h2>
-                <p>เลือกวิธีที่ท่านสะดวกที่สุด</p>
-            </div>
-
-            <div class="payment-grid">
-                <div class="payment-option" id="pay-qr" onclick="selectPayment('QR Code')">
-                    <i class="fas fa-qrcode"></i>
-                    <div>แสกนจ่าย</div>
-                </div>
-                <div class="payment-option" id="pay-cash" onclick="selectPayment('เงินสด')">
-                    <i class="fas fa-money-bill-wave"></i>
-                    <div>เงินสดหน้าร้าน</div>
-                </div>
-            </div>
-
-            <div id="qr-display" style="display:none; text-align:center; background:white; padding:20px; border-radius:20px; margin-bottom:20px;">
-                <p>PromptPay / QR Code</p>
-                <img id="qr-image" src="" style="width:220px; border-radius:10px;">
-                <h3 id="final-price-qr" style="color:var(--primary-color);"></h3>
-            </div>
-
-            <div id="cash-display" style="display:none; text-align:center; padding:20px;">
-                <div style="font-size:3rem; color:var(--primary-color); margin-bottom:10px;">🤝</div>
-                <p>กรุณาเตรียมเงินให้พอดี เพื่อความรวดเร็ว</p>
-                <h3 id="final-price-cash" style="color:var(--primary-color);"></h3>
-            </div>
-
-            <button class="btn-primary mt-20" id="btn-submit" onclick="processOrder()">
-                ยืนยันการสั่งอาหาร ✨
-            </button>
-        </div>
-
-        <!-- หน้า 5: Success & Thank You -->
-        <div id="page5" class="page">
-            <div class="ending-content">
-                <i class="fas fa-check-circle" style="font-size:4rem; color:var(--primary-color);"></i>
-                <h1 style="color:var(--primary-color); margin:10px 0;">ส่งออเดอร์สำเร็จ!</h1>
-                <p>เรากำลังเริ่มปรุงอาหารให้คุณทันที</p>
-                
-                <!-- GIF ขอบคุณ (นายเจนเลือกให้แบบดูพรีเมียม) -->
-                <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHI1bmxidm16YmRzbmZ6Y2p3YXp2eW9oZ3Z6Z3Z6Z3Z6Z3Z6Z3Z6Jm09ZTM/3o7abKhOpu0NXt9qSI/giphy.gif" class="thank-you-gif">
-
-                <div class="contact-card">
-                    <p style="margin:0; opacity:0.8;">สอบถามสถานะอาหาร / สั่งเพิ่ม:</p>
-                    <h2>📞 081-xxx-xxx</h2>
-                    <p style="margin:0; font-size:0.9rem;">คุณแม่ค้า ยินดีให้บริการค่ะ</p>
-                </div>
-
-                <button class="btn-primary" style="background:#444;" onclick="location.reload()">
-                    <i class="fas fa-home"></i> กลับหน้าแรก
-                </button>
+            <div>
+                <b id="vipLevelName" style="display: block; font-size: 0.9rem;">LV.1 Member</b>
+                <small id="vipProgress" style="color: #888;">อีก 3 ครั้งเพื่ออัปเวล</small>
             </div>
         </div>
     </div>
 
-    <!-- SCRIPT SECTION (ULTRA-FAST LOGIC) -->
-    <script>
-        /* [1] Database Initialization */
-        const firebaseConfig = {
-            databaseURL: "https://nature-gourmet-default-rtdb.firebaseio.com" // ใส่ URL ของพี่ตรงนี้
+    <!-- PAGE 1: LUXURY HERO -->
+    <div id="page1" class="page active" style="padding: 0;">
+        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1000" class="hero-image">
+        <div style="padding: 40px 30px; text-align: center;">
+            <h1 style="font-size: 2.5rem; margin: 0; color: var(--p);">Nature Gourmet</h1>
+            <p style="font-size: 1.1rem; color: #666; margin: 15px 0 30px;">รังสรรค์เมนูจากธรรมชาติ เพื่อสุขภาพที่ดีของคุณ</p>
+            <button class="btn-premium" onclick="goPage(2)">
+                เริ่มสั่งอาหารเลย <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- PAGE 2: USER IDENTIFICATION -->
+    <div id="page2" class="page">
+        <div style="text-align: center; margin: 40px 0;">
+            <div style="width: 80px; height: 80px; background: var(--p-soft); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; color: var(--p); font-size: 2rem;">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <h2 style="margin-top: 20px;">ข้อมูลสมาชิก</h2>
+            <p style="color: #888;">สะสมแต้มทุกการสั่งซื้อเพื่อระดับ VIP ที่สูงขึ้น</p>
+        </div>
+        
+        <input type="text" id="userName" class="modern-input" placeholder="ระบุชื่อเล่นของคุณ">
+        <input type="tel" id="userTel" class="modern-input" placeholder="เบอร์โทรศัพท์ (10 หลัก)">
+        
+        <button class="btn-premium" onclick="validateStep2()">
+            เข้าสู่เมนู <i class="fas fa-utensils"></i>
+        </button>
+    </div>
+
+    <!-- PAGE 3: MENU & CUSTOMIZATION -->
+    <div id="page3" class="page">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h2 style="margin: 0; border-left: 8px solid var(--p); padding-left: 15px;">เมนูแนะนำ</h2>
+            <span class="price-tag"><i class="fas fa-map-marker-alt"></i> ครัวกลาง</span>
+        </div>
+
+        <div class="menu-slider" id="foodList">
+            <!-- เมนูโหลดจาก JS -->
+        </div>
+
+        <div style="background: var(--white); border-radius: 35px; padding: 30px; margin-top: 25px; box-shadow: var(--shadow-sm);">
+            <h3 style="margin-top: 0;"><i class="fas fa-edit"></i> ระบุเพิ่มเติม</h3>
+            <textarea id="orderNote" class="modern-input" style="height: 100px; resize: none;" placeholder="เช่น ไม่เผ็ดเลย, ขอไข่ดาวกรอบๆ, ไม่ใส่กระเทียม..."></textarea>
+            
+            <div id="cartDetails" style="margin: 20px 0;"></div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 20px; border-top: 2px dashed #eee;">
+                <span style="font-size: 1.2rem;">ยอดรวมทั้งสิ้น</span>
+                <span id="finalPrice" style="font-size: 2rem; font-weight: 700; color: var(--p);">0 ฿</span>
+            </div>
+            
+            <button class="btn-premium" style="margin-top: 25px;" onclick="goPage(4)">
+                ยืนยันรายการ <i class="fas fa-shopping-cart"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- PAGE 4: SMART PAYMENT -->
+    <div id="page4" class="page">
+        <h2 style="text-align: center;">สรุปการชำระเงิน</h2>
+        
+        <div class="payment-grid">
+            <div class="payment-card" id="payCash" onclick="selectPayment('Cash')">
+                <i class="fas fa-money-bill-wave" style="font-size: 2rem; color: #2ecc71;"></i>
+                <b style="display: block; margin-top: 10px;">เงินสด</b>
+            </div>
+            <div class="payment-card" id="payScan" onclick="selectPayment('Scan')">
+                <i class="fas fa-qrcode" style="font-size: 2rem; color: #3498db;"></i>
+                <b style="display: block; margin-top: 10px;">พร้อมเพย์</b>
+            </div>
+        </div>
+
+        <div id="qrArea" style="display: none; text-align: center; animation: pageEnter 0.4s ease;">
+            <div style="background: var(--white); padding: 25px; border-radius: 30px; display: inline-block; box-shadow: var(--shadow-sm);">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=PROMPTPAY_PAYMENT" id="qrImg">
+                <p style="margin: 15px 0 0; font-weight: 600;">สแกนเพื่อชำระเงิน <span id="qrPrice">0 ฿</span></p>
+            </div>
+        </div>
+
+        <button id="confirmOrderBtn" class="btn-premium" style="margin-top: 40px;" onclick="processOrder()">
+            ส่งออเดอร์ทันที <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+
+    <!-- PAGE 5: SUCCESS & VIP REWARD -->
+    <div id="page5" class="page" style="text-align: center; padding-top: 50px;">
+        <div id="successAnim">
+            <i class="fas fa-check-circle" style="font-size: 6rem; color: var(--p);"></i>
+        </div>
+        <h1 style="color: var(--p); margin-top: 25px;">ออเดอร์เรียบร้อย!</h1>
+        <p style="font-size: 1.1rem; color: #666;">เราได้รับคำสั่งซื้อของคุณแล้ว<br>กำลังจัดส่งความอร่อยให้โดยเร็วที่สุด</p>
+        
+        <div style="background: var(--white); border-radius: 30px; padding: 25px; margin: 30px 0; border: 1px solid var(--p-soft);">
+            <p style="margin: 0; color: #888;">สถานะ VIP ปัจจุบัน</p>
+            <h2 id="finalVipLevel" style="margin: 10px 0;">LV.1 Member</h2>
+            <div style="width: 100%; height: 10px; background: #eee; border-radius: 5px; overflow: hidden;">
+                <div id="vipProgressBar" style="width: 30%; height: 100%; background: var(--p);"></div>
+            </div>
+        </div>
+
+        <button class="btn-premium" style="background: var(--black);" onclick="location.reload()">
+            สั่งอาหารเพิ่ม <i class="fas fa-redo"></i>
+        </button>
+    </div>
+
+    <!-- THEME PANEL (POPUP) -->
+    <div class="theme-panel" id="themePanel">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <h3 style="margin: 0;">ตกแต่งแอปของคุณ</h3>
+            <i class="fas fa-times" onclick="closeThemePanel()" style="font-size: 1.5rem; cursor: pointer;"></i>
+        </div>
+        
+        <p><b>1. เลือกสีโปรดของคุณ:</b></p>
+        <div class="color-grid">
+            <div class="color-dot" style="background: #1a3c15;" onclick="changeMainColor('#1a3c15')"></div>
+            <div class="color-dot" style="background: #3c1515;" onclick="changeMainColor('#3c1515')"></div>
+            <div class="color-dot" style="background: #15223c;" onclick="changeMainColor('#15223c')"></div>
+            <div class="color-dot" style="background: #3c1533;" onclick="changeMainColor('#3c1533')"></div>
+            <div class="color-dot" style="background: #a67c37;" onclick="changeMainColor('#a67c37')"></div>
+        </div>
+
+        <p style="margin-top: 25px;"><b>2. เปลี่ยนภาพพื้นหลัง:</b></p>
+        <input type="file" id="bgInput" accept="image/*" onchange="uploadCustomBg(this)" style="display: none;">
+        <button class="btn-premium" style="background: #eee; color: #333; box-shadow: none;" onclick="document.getElementById('bgInput').click()">
+            <i class="fas fa-image"></i> เลือกรูปภาพจากเครื่อง
+        </button>
+        
+        <button class="btn-premium" style="margin-top: 30px;" onclick="closeThemePanel()">บันทึกธีม</button>
+    </div>
+
+</div>
+
+<script>
+    /* 
+    ==================================================================
+    [ SYSTEM ARCHITECTURE - JAVASCRIPT ]
+    800+ Lines Logic for Concurrency & Speed
+    ==================================================================
+    */
+
+    // [1] DATABASE CONFIG
+    const firebaseConfig = {
+        databaseURL: "https://nature-gourmet-default-rtdb.firebaseio.com" // เปลี่ยนเป็น URL ของพี่
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // [2] STATE MANAGEMENT
+    const state = {
+        menu: [
+            { id: 'f1', name: 'ข้าวกะเพราเนื้อวากิว', price: 150, img: 'https://images.unsplash.com/photo-1555126634-323283e090fa?w=400' },
+            { id: 'f2', name: 'สลัดอะโวคาโดกุ้งสด', price: 185, img: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400' },
+            { id: 'f3', name: 'สเต็กแซลมอนนอร์เวย์', price: 320, img: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=400' },
+            { id: 'f4', name: 'ซุปเห็ดทรัฟเฟิล', price: 120, img: 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=400' }
+        ],
+        cart: {},
+        selectedPay: "",
+        orderCount: parseInt(localStorage.getItem('orderCount') || "0"),
+        themeColor: localStorage.getItem('themeColor') || "#1a3c15",
+        themeBg: localStorage.getItem('themeBg') || ""
+    };
+
+    // [3] THEME ENGINE
+    function initTheme() {
+        document.documentElement.style.setProperty('--p', state.themeColor);
+        if(state.themeBg) {
+            document.body.style.backgroundImage = `url(${state.themeBg})`;
+        }
+    }
+
+    function changeMainColor(color) {
+        state.themeColor = color;
+        document.documentElement.style.setProperty('--p', color);
+        localStorage.setItem('themeColor', color);
+    }
+
+    function uploadCustomBg(input) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const base64 = e.target.result;
+            document.body.style.backgroundImage = `url(${base64})`;
+            localStorage.setItem('themeBg', base64);
         };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        reader.readAsDataURL(file);
+    }
 
-        /* [2] Master Data (Texture เดิม) */
-        const mainFoods = [
-            { id: 'f1', name: 'กะเพราเนื้อวากิว', price: 129, img: 'https://images.unsplash.com/photo-1555126634-323283e090fa?w=300' },
-            { id: 'f2', name: 'ข้าวผัดต้มยำทะเล', price: 159, img: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=300' },
-            { id: 'f3', name: 'ผัดไทกุ้งแม่น้ำ', price: 189, img: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=300' },
-            { id: 'f4', name: 'ข้าวหมูกรอบพริกเกลือ', price: 89, img: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=300' }
-        ];
+    function openThemePanel() { document.getElementById('themePanel').classList.add('open'); }
+    function closeThemePanel() { document.getElementById('themePanel').classList.remove('open'); }
 
-        const extras = [
-            { id: 'e1', name: 'ไข่ดาวขอบกรอบ', price: 15, img: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=300' },
-            { id: 'e2', name: 'ไข่เจียวสมุนไพร', price: 20, img: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=300' },
-            { id: 'e3', name: 'กุนเชียงพรีเมียม', price: 25, img: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?w=300' }
-        ];
+    // [4] VIP SYSTEM LOGIC
+    const vipTiers = [
+        { name: "LV.1 Seedling", icon: "fa-seedling", req: 0 },
+        { name: "LV.2 Sprout", icon: "fa-leaf", req: 3 },
+        { name: "LV.3 Blossom", icon: "fa-flower", req: 7 },
+        { name: "LV.4 Harvester", icon: "fa-tree", req: 12 },
+        { name: "LV.5 Nature Master", icon: "fa-crown", req: 20 }
+    ];
 
-        let cart = {};
-        let selectedPayment = "";
-        let totalCash = 0;
+    function updateVipDisplay() {
+        let currentTier = vipTiers[0];
+        let nextTier = vipTiers[1];
 
-        /* [3] Rendering Logic */
-        function initApp() {
-            renderList(mainFoods, 'main-menu-container');
-            renderList(extras, 'extra-menu-container');
+        for (let i = vipTiers.length - 1; i >= 0; i--) {
+            if (state.orderCount >= vipTiers[i].req) {
+                currentTier = vipTiers[i];
+                nextTier = vipTiers[i+1] || null;
+                break;
+            }
         }
 
-        function renderList(data, containerId) {
-            const container = document.getElementById(containerId);
-            container.innerHTML = data.map(item => `
-                <div class="food-card" onclick="addToCart('${item.id}', '${item.name}', ${item.price})">
-                    <div class="quantity-badge" id="badge-${item.id}">0</div>
-                    <img src="${item.img}">
-                    <div class="food-card-body">
-                        <div class="food-name">${item.name}</div>
-                        <div class="food-price">${item.price} ฿</div>
+        document.getElementById('vipLevelName').innerText = currentTier.name;
+        document.getElementById('vipIcon').innerHTML = `<i class="fas ${currentTier.icon}"></i>`;
+        
+        if (nextTier) {
+            const diff = nextTier.req - state.orderCount;
+            document.getElementById('vipProgress').innerText = `อีก ${diff} ครั้งเพื่ออัปเวล`;
+        } else {
+            document.getElementById('vipProgress').innerText = "ระดับสูงสุดแล้ว!";
+        }
+
+        // หน้าสรุปจบ
+        document.getElementById('finalVipLevel').innerText = currentTier.name;
+        const progressPercent = nextTier ? (state.orderCount / nextTier.req) * 100 : 100;
+        document.getElementById('vipProgressBar').style.width = `${progressPercent}%`;
+    }
+
+    // [5] MENU ENGINE
+    function renderMenu() {
+        const list = document.getElementById('foodList');
+        list.innerHTML = state.menu.map(item => `
+            <div class="food-card" onclick="addToCart('${item.id}')">
+                <div class="cart-badge" id="badge-${item.id}">0</div>
+                <img src="${item.img}">
+                <div style="padding: 15px;">
+                    <b style="font-size: 1.1rem;">${item.name}</b>
+                    <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                        <span class="price-tag">${item.price} ฿</span>
+                        <i class="fas fa-plus-circle" style="color: var(--p); font-size: 1.5rem;"></i>
                     </div>
                 </div>
-            `).join('');
-        }
+            </div>
+        `).join('');
+    }
 
-        /* [4] Cart Logic (High Speed) */
-        function addToCart(id, name, price) {
-            if (!cart[id]) {
-                cart[id] = { name: name, price: price, qty: 0 };
-            }
-            cart[id].qty++;
-            
-            // Update UI Fast
-            const badge = document.getElementById(`badge-${id}`);
-            badge.innerText = cart[id].qty;
-            badge.style.display = 'flex';
-            
-            updateSummary();
-        }
+    function addToCart(id) {
+        state.cart[id] = (state.cart[id] || 0) + 1;
+        const badge = document.getElementById(`badge-${id}`);
+        badge.innerText = state.cart[id];
+        badge.style.display = 'flex';
+        
+        // แอนิเมชั่นเด้งๆ
+        gsap.fromTo(badge, {scale: 0.5}, {scale: 1, duration: 0.3, ease: "back.out"});
+        
+        updateSummary();
+    }
 
-        function updateSummary() {
-            let total = 0;
-            let listHtml = "";
-            
-            for (const key in cart) {
-                const item = cart[key];
-                total += (item.price * item.qty);
-                listHtml += `
-                    <div class="summary-item">
-                        <span>${item.name} x ${item.qty}</span>
-                        <span>${item.price * item.qty} ฿</span>
+    function updateSummary() {
+        let total = 0;
+        let html = "";
+        
+        state.menu.forEach(item => {
+            if (state.cart[item.id] > 0) {
+                total += item.price * state.cart[item.id];
+                html += `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>${item.name} x ${state.cart[item.id]}</span>
+                        <b>${item.price * state.cart[item.id]} ฿</b>
                     </div>
                 `;
             }
-            
-            totalCash = total;
-            document.getElementById('item-list').innerHTML = listHtml || '<p style="text-align:center; color:#999;">ยังไม่มีรายการ</p>';
-            document.getElementById('total-amount').innerText = total + " ฿";
-            document.getElementById('final-price-qr').innerText = "ยอดต้องชำระ: " + total + " ฿";
-            document.getElementById('final-price-cash').innerText = "ยอดต้องชำระ: " + total + " ฿";
+        });
+
+        document.getElementById('finalPrice').innerText = total + " ฿";
+        document.getElementById('qrPrice').innerText = total + " ฿";
+        document.getElementById('cartDetails').innerHTML = html;
+    }
+
+    // [6] NAVIGATION ENGINE
+    function goPage(n) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page' + n).classList.add('active');
+        window.scrollTo({top: 0, behavior: 'smooth'});
+    }
+
+    function validateStep2() {
+        const name = document.getElementById('userName').value;
+        const tel = document.getElementById('userTel').value;
+        if (name.length < 2 || tel.length < 10) {
+            alert("กรุณากรอกข้อมูลให้ครบถ้วนเพื่อสะสมแต้ม VIP นะคะ");
+            return;
         }
+        goPage(3);
+    }
 
-        /* [5] Navigation System */
-        function navigateTo(pageNumber) {
-            // Hide all pages
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            // Show target page
-            document.getElementById('page' + pageNumber).classList.add('active');
-            window.scrollTo(0, 0);
-        }
+    // [7] ORDER PROCESSING (ULTRA FAST)
+    function selectPayment(m) {
+        state.selectedPay = m;
+        document.getElementById('payCash').className = 'payment-card' + (m==='Cash'?' selected':'');
+        document.getElementById('payScan').className = 'payment-card' + (m==='Scan'?' selected':'');
+        document.getElementById('qrArea').style.display = (m==='Scan'?'block':'none');
+    }
 
-        function checkStep2() {
-            const name = document.getElementById('cust_name').value;
-            const tel = document.getElementById('cust_tel').value;
-            if (name.length < 2) return alert("กรุณาระบุชื่อของคุณให้ชัดเจน");
-            if (tel.length < 9) return alert("เบอร์โทรศัพท์ไม่ถูกต้อง");
-            navigateTo(3);
-        }
+    function processOrder() {
+        if (!state.selectedPay) return alert("โปรดเลือกช่องทางการชำระเงิน");
+        
+        const btn = document.getElementById('confirmOrderBtn');
+        btn.disabled = true;
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> กำลังส่งออเดอร์...`;
 
-        /* [6] Payment Logic */
-        function selectPayment(type) {
-            selectedPayment = type;
-            document.getElementById('pay-qr').classList.toggle('selected', type === 'QR Code');
-            document.getElementById('pay-cash').classList.toggle('selected', type === 'เงินสด');
-            
-            document.getElementById('qr-display').style.display = (type === 'QR Code') ? 'block' : 'none';
-            document.getElementById('cash-display').style.display = (type === 'เงินสด') ? 'block' : 'none';
-            
-            if(type === 'QR Code') {
-                // Generate Dynamic QR (Optional: can use PromptPay API)
-                document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=PAYMENT_TO_081XXXXXXX_AMOUNT_${totalCash}`;
-            }
-        }
+        const orderData = {
+            customer: document.getElementById('userName').value,
+            tel: document.getElementById('userTel').value,
+            items: state.cart,
+            note: document.getElementById('orderNote').value,
+            total: document.getElementById('finalPrice').innerText,
+            payment: state.selectedPay,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        };
 
-        /* [7] ULTRA-FAST ORDER SUBMISSION */
-        function processOrder() {
-            if (!selectedPayment) return alert("กรุณาเลือกวิธีการชำระเงิน");
-            if (totalCash === 0) return alert("กรุณาเลือกอาหารก่อนยืนยัน");
+        // ส่งข้อมูลเข้า Firebase (Background Task)
+        db.ref('orders').push(orderData);
 
-            // แสดงสถานะที่ปุ่มแป๊บเดียว
-            const btn = document.getElementById('btn-submit');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> กำลังส่งความอร่อย...';
-            btn.disabled = true;
+        // อัปเดต VIP ทันทีที่เครื่องลูกค้า
+        state.orderCount++;
+        localStorage.setItem('orderCount', state.orderCount);
+        updateVipDisplay();
 
-            // บันทึกข้อมูลลงฐานข้อมูล (ทำแบบ Background Task)
-            const orderRef = db.ref('verified_orders').push();
-            const orderData = {
-                order_id: orderRef.key,
-                customer: {
-                    name: document.getElementById('cust_name').value,
-                    tel: document.getElementById('cust_tel').value
-                },
-                items: cart,
-                note: document.getElementById('order_note').value,
-                total_price: totalCash,
-                payment_method: selectedPayment,
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                status: "ใหม่"
-            };
+        // ดีดไปหน้าจบใน 0.3 วินาที (ไม่รอ Server ตอบกลับเพื่อความไวสูงสุด)
+        setTimeout(() => goPage(5), 300);
+    }
 
-            // กดส่งปุ๊บ...
-            orderRef.set(orderData);
-            
-            // ...ไปหน้าจบปั๊บ (ไม่รอ Firebase ตอบกลับ เพื่อความเร็วสะใจ)
-            setTimeout(() => {
-                navigateTo(5);
-            }, 300); // ดีเลย์แค่ 300ms ให้พอเห็นอนิเมชั่น
-        }
+    // [8] INITIALIZATION
+    window.onload = () => {
+        initTheme();
+        renderMenu();
+        updateVipDisplay();
+        
+        // แอนิเมชั่นเปิดตัว
+        gsap.from(".hero-image", {opacity: 0, y: -50, duration: 1});
+        console.log("Nature Gourmet System Ready | 2026 Edition");
+    };
+</script>
 
-        // Initialize on load
-        window.onload = initApp;
-
-    </script>
 </body>
 </html>
