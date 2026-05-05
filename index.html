@@ -15,7 +15,11 @@
         .active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* สไตล์ Slider เมนูและวัตถุดิบ */
+        /* สไตล์หน้าโปรโมท */
+        .promo-img { width: 100%; height: 70vh; object-fit: cover; border-radius: 0 0 40px 40px; margin: -20px -20px 20px -20px; width: calc(100% + 40px); }
+        .promo-text { text-align: center; padding: 20px; }
+
+        /* สไตล์ Slider เมนูและวัตถุดิบ (คงเดิม) */
         .slider-container { display: flex; overflow-x: auto; gap: 15px; padding: 10px 5px; scroll-snap-type: x mandatory; }
         .slider-container::-webkit-scrollbar { display: none; }
         .card { flex: 0 0 180px; background: white; border-radius: 15px; overflow: hidden; border: 1px solid #eee; position: relative; cursor: pointer; transition: 0.2s; }
@@ -29,24 +33,54 @@
         .custom-box { background: #f0f4f0; padding: 15px; border-radius: 15px; margin-top: 20px; }
         input, textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         
-        /* สรุปตระกร้า */
+        /* GPS & Payment */
+        .location-box { background: #eef2ed; border: 1px dashed var(--p); padding: 15px; border-radius: 15px; text-align: center; margin: 15px 0; cursor: pointer; }
+        .pay-selector { display: flex; gap: 10px; margin: 15px 0; }
+        .pay-option { flex: 1; padding: 15px; border: 2px solid #eee; border-radius: 12px; text-align: center; cursor: pointer; font-weight: 600; }
+        .pay-option.selected { border-color: var(--p); background: #f0f4f0; color: var(--p); }
+
         .cart-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- หน้า 1: ลงชื่อ -->
+    <!-- หน้า 1: โปรโมทร้าน -->
     <div id="p1" class="page active">
-        <h1 style="text-align:center; color: var(--p);">Nature Gourmet</h1>
+        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800" class="promo-img">
+        <div class="promo-text">
+            <h1 style="color:var(--p)">Nature Gourmet</h1>
+            <p>สัมผัสบรรยากาศร้านที่อบอุ่นและเป็นกันเอง</p>
+            <button class="btn-main" onclick="go(2)">ถัดไป ➔</button>
+        </div>
+    </div>
+
+    <!-- หน้า 2: โปรโมทอาหาร -->
+    <div id="p2" class="page">
+        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800" class="promo-img">
+        <div class="promo-text">
+            <h2 style="color:var(--p)">คัดสรรวัตถุดิบชั้นเลิศ</h2>
+            <p>เพื่อรสชาติที่ลูกค้าประทับใจในทุกคำ</p>
+            <button class="btn-main" onclick="go(3)">เริ่มสั่งอาหารเลย ➔</button>
+        </div>
+    </div>
+
+    <!-- หน้า 3: ลงชื่อ (หน้าที่ 1 เดิม) -->
+    <div id="p3" class="page">
+        <h1 style="text-align:center; color: var(--p);">ยินดีต้อนรับ</h1>
         <p style="text-align:center;">กรุณาระบุข้อมูลผู้สั่ง</p>
         <input type="text" id="custName" placeholder="ชื่อเล่น/ชื่อลูกค้า">
         <input type="tel" id="custTel" placeholder="เบอร์โทรศัพท์">
-        <button class="btn-main" onclick="go(2)">เข้าสู่หน้าสั่งอาหาร ➔</button>
+        <button class="btn-main" onclick="go(4)">เข้าสู่เมนูอาหาร ➔</button>
     </div>
 
-    <!-- หน้า 2: เลือกเมนูหลัก -->
-    <div id="p2" class="page">
+    <!-- หน้า 4: เลือกเมนูหลัก (หน้าที่ 2 เดิม) -->
+    <div id="p4" class="page">
+        <!-- เพิ่ม GPS ร้าน -->
+        <div class="location-box" onclick="window.open('https://maps.google.com/?q=Your+Shop+Location', '_blank')">
+            📍 <strong>พิกัดร้าน:</strong> กดเพื่อดูแผนที่มาร้านเรา
+        </div>
+
         <h3>1. เลือกเมนูหลัก (จิ้มที่รูป)</h3>
         <div class="slider-container" id="main-menu"></div>
         
@@ -63,25 +97,37 @@
                 <span>ยอดรวม:</span>
                 <span id="totalPrice" style="color:var(--p)">0 ฿</span>
             </div>
-            <button class="btn-main" onclick="go(3)">ยืนยันรายการ/ชำระเงิน</button>
+            <button class="btn-main" onclick="go(5)">ยืนยันรายการ/ชำระเงิน</button>
         </div>
     </div>
 
-    <!-- หน้า 3: ชำระเงิน -->
-    <div id="p3" class="page">
-        <h2 style="text-align:center;">ชำระเงิน</h2>
-        <div style="text-align:center; background:#f9f9f9; padding:20px; border-radius:20px;">
+    <!-- หน้า 5: ชำระเงิน (หน้าที่ 3 เดิม + ตัวเลือกจ่ายเงิน) -->
+    <div id="p5" class="page">
+        <h2 style="text-align:center;">สรุปการชำระเงิน</h2>
+        
+        <div class="pay-selector">
+            <div class="pay-option" id="opt-cash" onclick="selectPay('cash')">💵 เงินสด</div>
+            <div class="pay-option" id="opt-scan" onclick="selectPay('scan')">📱 แสกนจ่าย</div>
+        </div>
+
+        <div id="scan-area" style="display:none; text-align:center; background:#f9f9f9; padding:20px; border-radius:20px;">
             <p>ยอดที่ต้องโอน: <strong id="payTotal" style="font-size:1.5rem; color:var(--p)">0 ฿</strong></p>
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=PROMPTPAY" style="border-radius:10px;">
             <p style="font-size:0.8rem; margin-top:10px;">แนบสลิปเพื่อยืนยันออเดอร์</p>
             <input type="file" id="slipFile">
         </div>
+
+        <div id="cash-area" style="display:none; text-align:center; padding:20px; border: 1px solid #ddd; border-radius:20px;">
+            <p>เตรียมเงินสดมาชำระที่ร้านจำนวน</p>
+            <h2 id="cashTotal" style="color:var(--p)">0 ฿</h2>
+        </div>
+
         <button class="btn-main" onclick="confirmOrder()">ยืนยันออเดอร์เรียบร้อย ✨</button>
-        <button class="btn-main" style="background:#ccc" onclick="go(2)">กลับไปแก้ไข</button>
+        <button class="btn-main" style="background:#ccc" onclick="go(4)">กลับไปแก้ไข</button>
     </div>
 
-    <!-- หน้า 4: ขอบคุณ -->
-    <div id="p4" class="page" style="text-align:center; padding-top:100px;">
+    <!-- หน้า 6: ขอบคุณ -->
+    <div id="p6" class="page" style="text-align:center; padding-top:100px;">
         <h1 style="font-size:4rem;">✅</h1>
         <h2>ออเดอร์ส่งถึงแม่ค้าแล้ว!</h2>
         <p>รอรับความอร่อยได้เลยครับ/ค่ะ</p>
@@ -90,7 +136,6 @@
 </div>
 
 <script>
-    // --- 1. CONFIG FIREBASE (ใส่ค่าของคุณตรงนี้) ---
     const firebaseConfig = {
         apiKey: "AIza...", 
         databaseURL: "https://your-db-url.firebaseio.com",
@@ -99,7 +144,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // --- 2. ข้อมูลสินค้าและวัตถุดิบ (กำหนดสต็อกตรงนี้) ---
     const mainFoods = [
         { id: 'f1', name: 'กะเพราหมูกรอบ', price: 70, stock: 10, img: 'https://images.unsplash.com/photo-1555126634-323283e090fa?w=300' },
         { id: 'f2', name: 'ข้าวผัดต้มยำ', price: 85, stock: 5, img: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=300' }
@@ -112,14 +156,14 @@
     ];
 
     let cart = {}; 
+    let selectedPayMethod = "";
 
-    // --- 3. ฟังก์ชันแสดงผล ---
-    function renderList(data, containerId, isIngredient) {
+    function renderList(data, containerId) {
         const container = document.getElementById(containerId);
         container.innerHTML = data.map(item => {
             cart[item.id] = 0;
             return `
-                <div class="card" onclick="addToCart('${item.id}', ${item.stock}, ${isIngredient})">
+                <div class="card" onclick="addToCart('${item.id}', ${item.stock})">
                     <div class="stock-tag" id="stock-${item.id}">เหลือ ${item.stock}</div>
                     <div class="qty-tag" id="qty-${item.id}">0</div>
                     <img src="${item.img}">
@@ -147,34 +191,39 @@
     function calculateTotal() {
         let total = 0;
         let summaryHtml = "";
-        
         [...mainFoods, ...ingredients].forEach(item => {
             if (cart[item.id] > 0) {
                 total += cart[item.id] * item.price;
                 summaryHtml += `<div class="cart-item"><span>${item.name} x ${cart[item.id]}</span><span>${cart[item.id] * item.price} ฿</span></div>`;
             }
         });
-
         document.getElementById('totalPrice').innerText = total + " ฿";
         document.getElementById('payTotal').innerText = total + " ฿";
+        document.getElementById('cashTotal').innerText = total + " ฿";
         document.getElementById('cart-summary').innerHTML = summaryHtml;
     }
 
+    function selectPay(method) {
+        selectedPayMethod = method;
+        document.querySelectorAll('.pay-option').forEach(el => el.classList.remove('selected'));
+        document.getElementById('opt-' + method).classList.add('selected');
+        document.getElementById('scan-area').style.display = method === 'scan' ? 'block' : 'none';
+        document.getElementById('cash-area').style.display = method === 'cash' ? 'block' : 'none';
+    }
+
     function go(page) {
-        if (page === 2 && (!document.getElementById('custName').value)) return alert("ใส่ชื่อหน่อยนะค้าบ");
+        if (page === 4 && (!document.getElementById('custName').value)) return alert("ใส่ชื่อหน่อยนะค้าบ");
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById('p' + page).classList.add('active');
         window.scrollTo(0,0);
     }
 
-    // --- 4. ฟังก์ชันส่งออเดอร์ (แก้บัคออเดอร์ไม่ขึ้น) ---
     function confirmOrder() {
+        if (!selectedPayMethod) return alert("กรุณาเลือกวิธีการชำระเงิน");
         const name = document.getElementById('custName').value;
         const tel = document.getElementById('custTel').value;
         const method = document.getElementById('cookMethod').value;
         const total = document.getElementById('totalPrice').innerText;
-
-        if (total === "0 ฿") return alert("ยังไม่ได้เลือกอะไรเลยจ้า");
 
         const orderData = {
             customer: name,
@@ -182,24 +231,17 @@
             items: cart,
             cooking_instruction: method,
             total_price: total,
+            payment_type: selectedPayMethod,
             status: "Pending",
             timestamp: firebase.database.ServerValue.TIMESTAMP
         };
 
-        // ใช้ .push() เพื่อสร้าง ID ใหม่เสมอ ป้องกันออเดอร์หาย
-        db.ref('orders').push(orderData)
-            .then(() => {
-                go(4);
-            })
-            .catch((error) => {
-                alert("เกิดข้อผิดพลาด: " + error.message);
-                console.error("Firebase Error:", error);
-            });
+        db.ref('orders').push(orderData).then(() => go(6)).catch(err => alert(err.message));
     }
 
     window.onload = () => {
-        renderList(mainFoods, 'main-menu', false);
-        renderList(ingredients, 'ingredient-menu', true);
+        renderList(mainFoods, 'main-menu');
+        renderList(ingredients, 'ingredient-menu');
     };
 </script>
 </body>
